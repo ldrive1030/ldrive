@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Ldrive - Transport entre femmes, en toute sécurité">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="style.css" rel="stylesheet">
+	
+	<title>Ldrive | Transport entre femmes</title>
+<link rel="icon" type="image/png" href="img/favicon.png">   
+   <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f9f0f5 0%, #f5e6ec 100%);
+            color: #4a3b47;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        header {
+            text-align: center;
+            padding: 2rem 0 1rem;
+        }
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .logo-icon {
+            background: #b5838a;
+            width: 60px;
+            height: 60px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            font-size: 32px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .logo-text {
+            background: linear-gradient(135deg, #b5838a, #6d597a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .tagline {
+            font-size: 1.2rem;
+            color: #b5838a;
+            margin-bottom: 2rem;
+        }
+        .hero {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+            justify-content: space-between;
+            margin: 3rem 0;
+        }
+        .hero-text {
+            flex: 1;
+            min-width: 250px;
+        }
+        .hero-text h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .hero-text p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            background: #b5838a;
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: transform 0.2s, background 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            background: #9f6f78;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #b5838a;
+            color: #b5838a;
+        }
+        .btn-outline:hover {
+            background: #b5838a;
+            color: white;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .install-steps {
+            background: #fff7f9;
+            border-radius: 24px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .step {
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+            padding: 1rem;
+        }
+        .step-number {
+            background: #b5838a;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #f0e2e6;
+            font-size: 0.9rem;
+            color: #b5838a;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .hero { flex-direction: column; text-align: center; }
+            .cta-buttons { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+<a href="index.html" style="text-decoration: none;">
+    <div class="logo">
+        <span class="logo-icon"><img src="img/logo-icon.png" alt="Logo" class="logo-icon"></span>
+        <span class="logo-text">Ldrive</span>
+    </div>
+</a>
+            <div class="tagline">Transport entre femmes, en toute sécurité</div>
+        </header>
+
+        <div class="hero">
+            <div class="hero-text">
+                <h2>" Entre femmes, on fait route ensemble en toute sérénité ! 🚗✨"</h2>
+                <p>Partager ses trajets entre voisines, c’est bien plus que du covoiturage. C’est l’occasion de voyager dans une ambiance rassurante et conviviale. 
+</p>
+                <div class="cta-buttons">
+                    <a href="app.html" class="btn">Utiliser via le web</a>
+                    <button id="installPwaBtn" class="btn btn-outline">Installer l'application</button>
+                </div>
+            </div>
+            <div style="flex:1; text-align:center;">
+                <img src="img/app-preview.png" alt="Aperçu Ldrive" style="max-width: 100%; border-radius: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-brands fa-bluesky fa-beat-fade"></i></div>
+                <h3>La tranquillité d'esprit</h3>
+                <p>Un espace 100 % féminin pour se sentir totalement à l'aise.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3>L'entraide au quotidien</h3>
+                <p>On se rend service tout en divisant les frais de carburant.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌟</div>
+                <h3>Le plaisir de la rencontre</h3>
+                <p>On papote, on échange des bons plans ou on profite simplement du trajet à plusieurs.</p>
+            </div>
+        </div>
+
+        <div class="install-steps">
+            <h3 style="text-align:center;">📱 Installez Ldrive sur votre téléphone</h3>
+            <p style="text-align:center;">Profitez d'une expérience comme une application native, même hors ligne.</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <p><strong>Android (Chrome)</strong><br>Ouvrez ce site, appuyez sur les trois points, puis "Installer l'application".</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <p><strong>iOS (Safari)</strong><br>Appuyez sur le bouton "Partager", puis "Ajouter à l'écran d'accueil".</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <p><strong>Ordinateur (Chrome/Edge)</strong><br>Cliquez sur l'icône d'installation dans la barre d'adresse.</p>
+                </div>
+            </div>
+            <p style="text-align:center; margin-top:1rem;"><small>Ldrive est une Progressive Web App (PWA) : elle fonctionne hors ligne et se met à jour automatiquement.</small></p>
+        </div>
+
+        <footer>
+            <p>Ldrive – Transport entre femmes – © 2025</p>
+            <p>
+                <a href="privacy.html" style="color:#b5838a;">Politique de confidentialité</a> | 
+                <a href="terms.html" style="color:#b5838a;">Conditions d'utilisation</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Gestion du bouton d'installation PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPwaBtn').style.display = 'inline-block';
+        });
+
+        document.getElementById('installPwaBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('Installation acceptée');
+                }
+                deferredPrompt = null;
+            } else {
+                alert("Pour installer l'application, utilisez les instructions ci-dessus (menu de votre navigateur).");
+            }
+        });
+    </script>
+</body>
+</html>
