@@ -7,7 +7,7 @@
     let pendingRidesListener = null;
     let currentDriverRide = null;
     let pendingRideListener = null;
-    let driverMessagesUnsubscribe = null; // pour arrêter l'écouteur précédent
+    let driverMessagesUnsubscribe = null;
 
     let driverPosition = null;
     let driverWatchId = null;
@@ -71,7 +71,8 @@
         roleDisplayDiv,
         bookingDiv, waitingDiv,
         paymentModal, paymentAmountSpan, payStripeBtn, payPaypalBtn, payGooglepayBtn, payApplepayBtn, paymentErrorDiv,
-        authPanel;
+        authPanel,
+        installBtn;
 
     // ==================== MAP & LOCATION ====================
     let map, pickupMarker, dropoffMarker;
@@ -725,7 +726,6 @@
     }
 
     async function loadMessages(rideId, role) {
-        // Arrêter l'écouteur précédent pour éviter les doublons
         if (role === 'driver' && driverMessagesUnsubscribe) {
             driverMessagesUnsubscribe();
             driverMessagesUnsubscribe = null;
@@ -1129,17 +1129,20 @@
         payApplepayBtn = document.getElementById('pay-applepay-btn');
         paymentErrorDiv = document.getElementById('payment-error');
         authPanel = document.getElementById('auth-panel');
+        installBtn = document.getElementById('install-app-btn');
 
         // ==================== GESTION DU BOUTON D'INSTALLATION ====================
+        // Le bouton est toujours visible
+        if (installBtn) {
+            installBtn.style.display = 'flex';
+        }
+
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            const installBtn = document.getElementById('install-app-btn');
-            if (installBtn) installBtn.style.display = 'flex';
         });
 
-        const installBtn = document.getElementById('install-app-btn');
         if (installBtn) {
             installBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
@@ -1149,7 +1152,6 @@
                         console.log('Installation acceptée');
                     }
                     deferredPrompt = null;
-                    installBtn.style.display = 'none';
                 } else {
                     showToast('Pour installer l’application, utilisez le menu de votre navigateur : "Ajouter à l’écran d’accueil".');
                 }
@@ -1462,12 +1464,10 @@
                         if (currentUser) showDriverProfile();
                     }
                     if (tabId === 'driver-active') {
-                        // Recharger les messages si une course est active
                         if (activeRideId && currentUser) {
                             if (currentDriverRide) {
                                 loadMessages(activeRideId, 'driver');
                             } else {
-                                // Si currentDriverRide n'est pas défini, le récupérer depuis Firestore
                                 db.collection('rides').doc(activeRideId).get().then(doc => {
                                     if (doc.exists) {
                                         currentDriverRide = doc.data();
