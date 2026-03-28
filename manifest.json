@@ -2,7 +2,7 @@
     "name": "Ldrive",
     "short_name": "Ldrive",
     "description": "Transport entre femmes",
-    "start_url": "/app.html",
+    "start_url": "app.html",
     "display": "standalone",
     "theme_color": "#b5838a",
     "background_color": "#f9f0f5",
