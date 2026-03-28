@@ -1112,6 +1112,27 @@
         paymentErrorDiv = document.getElementById('payment-error');
         authPanel = document.getElementById('auth-panel');
 
+// Dans le DOMContentLoaded, après la récupération des éléments
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('install-app-btn');
+    if (installBtn) installBtn.style.display = 'block';
+});
+
+document.getElementById('install-app-btn')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('Installation acceptée');
+        }
+        deferredPrompt = null;
+        document.getElementById('install-app-btn').style.display = 'none';
+    }
+});
+
         // Localisation
         if (pickupInput) {
             pickupInput.addEventListener('change', () => {
