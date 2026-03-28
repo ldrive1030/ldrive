@@ -2,722 +2,220 @@
 
 
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f9f0f5">
+    <meta name="description" content="Ldrive - Transport entre femmes, en toute sécurité">
+	<link rel="icon" type="image/png" href="img/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Ldrive - Entre femmes</title>
+    <!-- Leaflet CSS/JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- Stripe.js (pour les paiements) -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Firebase SDK (version compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-body {
-    background-color: #faf3f5;
-    overflow-x: hidden;
-}
+    <script>
+        // Configuration Firebase (REMPLACEZ PAR VOS VALEURS)
+        const firebaseConfig = {
+  apiKey: "AIzaSyBiqHVc74_e0KWVXYzbtLwpmJV5SGTz9HE",
+  authDomain: "ldrive-3b2b8.firebaseapp.com",
+  projectId: "ldrive-3b2b8",
+  storageBucket: "ldrive-3b2b8.firebasestorage.app",
+  messagingSenderId: "606298395546",
+  appId: "1:606298395546:web:42f7c2066bd47a12eea023"
+        };
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized");
+    </script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-top">
+                <div class="logo">
+                    <a href="index.html" style="text-decoration: none;">
+                        <span class="logo-icon"><img src="img/logo-icon.png" alt="Logo" class="logo-icon"></span>
+                        <span class="logo-text">Ldrive</span>
+                    </a>
+                </div>
+                <div class="role-display" id="role-display"></div>
+                <div class="install-button-container">
+                    <button id="install-app-btn" class="install-btn" style="display: none;">
+                        <span class="install-icon">📲</span> Installer
+                    </button>
+                </div>
+            </div>
+            <div class="tabs" id="client-tabs" style="display: none;">
+                <button class="tab-btn active" data-tab="rides">Courses</button>
+                <button class="tab-btn" data-tab="activity">Activité</button>
+                <button class="tab-btn" data-tab="account">Compte</button>
+            </div>
+            <div class="tabs" id="driver-tabs" style="display: none;">
+                <button class="tab-btn active" data-tab="driver-requests">Courses disponibles</button>
+                <button class="tab-btn" data-tab="driver-active">Course en cours</button>
+                <button class="tab-btn" data-tab="driver-history">Historique</button>
+                <button class="tab-btn" data-tab="driver-account">Compte</button>
+            </div>
+        </header>
 
-#app {
-    max-width: 100%;
-    margin: 0 auto;
-    background: #ffffff;
-    min-height: 100vh;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    border-radius: 28px 28px 0 0;
-    position: relative;
-    overflow: hidden;
-}
+        <main class="tab-content">
+            <!-- Panneau d'authentification (visible par défaut) -->
+            <div id="auth-panel"></div>
 
-.app-header {
-    background: #ffffff;
-    border-bottom: 1px solid #f0e2e6;
-    padding: 12px 16px 0 16px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(8px);
-}
+            <!-- Interface cliente -->
+            <div id="rides-tab" class="tab-pane active">
+                <div id="ride-booking">
+                    <div class="ride-header">
+                        <div class="time-toggle">
+                            <button id="now-btn" class="time-option active">Maintenant</button>
+                            <button id="later-btn" class="time-option">Plus tard</button>
+                        </div>
+                        <div class="datetime-picker" id="datetime-picker" style="display: none;">
+                            <input type="datetime-local" id="schedule-datetime">
+                        </div>
+                    </div>
+                    <div class="location-inputs">
+                        <div class="input-group">
+                            <div class="icon">📍</div>
+                            <input type="text" id="pickup-input" placeholder="Où êtes-vous ?" autocomplete="off">
+                            <button id="use-current-location" class="location-btn">📍 Me localiser</button>
+                        </div>
+                        <div class="input-group">
+                            <div class="icon">🏁</div>
+                            <input type="text" id="dropoff-input" placeholder="Où allez-vous ?" autocomplete="off">
+                        </div>
+                    </div>
+                    <div id="map"></div>
+                    <div class="ride-options">
+                        <h3>Choisissez votre course</h3>
+                        <div id="ride-card" class="ride-card"></div>
+                        <button id="confirm-ride-btn" class="confirm-btn" disabled>Confirmer la course</button>
+                    </div>
+                </div>
+                <div id="waiting-view" style="display: none;">
+                    <div class="waiting-container">
+                        <div class="spinner"></div>
+                        <h3>En attente d'acceptation par une conductrice...</h3>
+                        <p>Votre course a été demandée. Vous serez notifiée dès qu'une conductrice l'accepte.</p>
+                        <button id="cancel-waiting-btn" class="confirm-btn" style="background:#e6c3c3; color:#5e3a3a;">Annuler la demande</button>
+                    </div>
+                </div>
+            </div>
 
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 8px;
-}
+            <div id="tracking-tab" class="tab-pane">
+                <div id="tracking-view">
+                    <h2>Votre course Ldrive</h2>
+                    <div id="tracking-map" style="height: 250px; margin-bottom: 16px;"></div>
+                    <div id="tracking-status">
+                        <p><strong>Statut :</strong> <span id="status-text">Recherche d'une conductrice...</span></p>
+                        <p><strong>Conductrice :</strong> <span id="driver-name">---</span></p>
+                        <p><strong>Véhicule :</strong> <span id="vehicle-info">---</span></p>
+                        <p><strong>Temps d'attente estimé :</strong> <span id="eta">---</span></p>
+                    </div>
+                    <div id="chat-section">
+                        <h3>Messagerie avec la conductrice</h3>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Votre message..." autocomplete="off">
+                            <button id="chat-send-btn">Envoyer</button>
+                        </div>
+                    </div>
+                    <button id="complete-ride-btn" class="confirm-btn" style="background: #b5838a;">Terminer la course</button>
+                    <button id="cancel-ride-btn" class="confirm-btn" style="background: #e6c3c3; color:#5e3a3a; margin-top: 8px;">Annuler</button>
+                </div>
+            </div>
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-}
-.logo a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: inherit;
-}
-.logo-icon {
-    font-size: 28px;
-    background: #fae1e7;
-    width: 40px;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 30px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-}
-.logo-text {
-    background: linear-gradient(135deg, #b5838a, #6d597a);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    font-weight: 700;
-    font-size: 24px;
-}
+            <div id="activity-tab" class="tab-pane">
+                <h2>Vos activités récentes</h2>
+                <div id="rides-history" class="history-list"></div>
+            </div>
 
-.role-badge {
-    background: #b5838a;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 40px;
-    font-size: 14px;
-    font-weight: 500;
-}
+            <div id="account-tab" class="tab-pane">
+                <div id="auth-section"></div>
+            </div>
 
-.role-display {
-    margin-left: auto;
-}
+            <!-- Interface conductrice -->
+            <div id="driver-requests-tab" class="tab-pane">
+                <h2>Courses demandées</h2>
+                <div id="pending-rides-list" class="pending-rides-list"></div>
+            </div>
 
-.install-button-container {
-    margin-left: 8px;
-}
-.install-btn {
-    background: rgba(255,255,255,0.8);
-    border: 1px solid #e0d4d9;
-    border-radius: 40px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #6d597a;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    backdrop-filter: blur(4px);
-}
-.install-btn:hover {
-    background: #b5838a;
-    color: white;
-    border-color: #b5838a;
-}
-.install-icon {
-    font-size: 14px;
-}
+            <div id="driver-active-tab" class="tab-pane">
+                <div id="driver-active-view">
+                    <h2>Course en cours</h2>
+                    <div id="driver-tracking-map" style="height: 250px; margin-bottom: 16px;"></div>
+                    <div id="driver-tracking-status">
+                        <p><strong>Cliente :</strong> <span id="driver-client-name">---</span></p>
+                        <p><strong>Trajet :</strong> <span id="driver-route">---</span></p>
+                        <p><strong>Statut :</strong> <span id="driver-status-text">---</span></p>
+                    </div>
+                    <div id="driver-chat-section">
+                        <h3>Messagerie avec la cliente</h3>
+                        <div id="driver-chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="driver-chat-input" placeholder="Votre message..." autocomplete="off">
+                            <button id="driver-chat-send-btn">Envoyer</button>
+                        </div>
+                    </div>
+                    <button id="driver-go-to-pickup-btn" class="confirm-btn" style="background: #b5838a;">📍 Aller à la cliente</button>
+                    <button id="driver-start-ride-btn" class="confirm-btn" style="background: #b5838a;"><img src="img/logo-icon.png" alt="Logo" class="logo-icon"> Démarrer la course</button>
+                    <button id="driver-complete-ride-btn" class="confirm-btn" style="background: #28a745;">Terminer la course</button>
+                    <button id="driver-cancel-ride-btn" class="confirm-btn" style="background: #e6c3c3; color:#5e3a3a; margin-top: 8px;">Annuler</button>
+                </div>
+            </div>
 
-.tabs {
-    display: flex;
-    gap: 4px;
-    background: #faf3f5;
-    padding: 4px;
-    border-radius: 50px;
-    margin-top: 8px;
-}
+            <div id="driver-history-tab" class="tab-pane">
+                <h2>Vos courses terminées</h2>
+                <div id="driver-history-list" class="history-list"></div>
+            </div>
 
-.tab-btn {
-    background: none;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 16px;
-    color: #9b7b8c;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 40px;
-}
-.tab-btn.active {
-    color: #6d597a;
-    background-color: #ffffff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
+            <div id="driver-account-tab" class="tab-pane">
+                <div id="driver-auth-section"></div>
+            </div>
+        </main>
 
-.tab-pane {
-    display: none;
-    padding: 20px 16px;
-    animation: fade 0.25s ease;
-}
-.tab-pane.active {
-    display: block;
-}
+        <!-- Spinner -->
+        <div id="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
+        </div>
 
-@keyframes fade {
-    from { opacity: 0; transform: translateY(4px);}
-    to { opacity: 1; transform: translateY(0);}
-}
+        <!-- Conteneur pour les notifications toast -->
+        <div id="toast-container"></div>
 
-/* Course */
-.time-toggle {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    background: #f7edf0;
-    border-radius: 40px;
-    padding: 4px;
-    width: fit-content;
-}
-.time-option {
-    padding: 8px 20px;
-    border: none;
-    background: transparent;
-    border-radius: 40px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s;
-    color: #b5838a;
-}
-.time-option.active {
-    background: white;
-    color: #6d597a;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-.datetime-picker input {
-    padding: 10px;
-    border: 1px solid #f0dbe0;
-    border-radius: 28px;
-    width: 100%;
-    font-family: inherit;
-    background: #fef9fb;
-}
+        <div id="confirmation-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Course confirmée !</h3>
+                <p id="modal-details"></p>
+                <button id="modal-close-btn">OK</button>
+            </div>
+        </div>
 
-.location-inputs {
-    background: white;
-    border-radius: 24px;
-    margin-bottom: 20px;
-}
-.input-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #fef9fb;
-    padding: 10px 14px;
-    border-radius: 60px;
-    margin-bottom: 12px;
-    border: 1px solid #f7e7ec;
-}
-.input-group .icon {
-    font-size: 18px;
-}
-.input-group input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 16px;
-    outline: none;
-    font-family: inherit;
-}
-.location-btn {
-    background: none;
-    border: none;
-    color: #b5838a;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-#map {
-    height: 260px;
-    border-radius: 28px;
-    margin: 20px 0;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-}
-
-.ride-options h3 {
-    margin: 16px 0 10px;
-    font-size: 18px;
-    color: #4a3b47;
-    font-weight: 600;
-}
-.ride-card {
-    background: #fef9fb;
-    border-radius: 28px;
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #f0e2e6;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-.ride-card.selected {
-    border-color: #b5838a;
-    background: #fff7f9;
-    box-shadow: 0 4px 12px rgba(181,131,138,0.1);
-}
-.ride-info h4 {
-    font-size: 16px;
-    margin-bottom: 4px;
-    color: #4a3b47;
-}
-.ride-info p {
-    font-size: 12px;
-    color: #b5838a;
-}
-.ride-price {
-    font-weight: bold;
-    font-size: 16px;
-    color: #6d597a;
-}
-.confirm-btn {
-    width: 100%;
-    background: #b5838a;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 60px;
-    font-weight: bold;
-    font-size: 14px;
-    margin-top: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-}
-.confirm-btn:disabled {
-    background: #e1cbd0;
-    cursor: not-allowed;
-}
-.confirm-btn:not(:disabled):hover {
-    background: #9f6f78;
-    transform: scale(0.98);
-}
-
-/* Historique */
-.history-list {
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-.history-item {
-    background: #fef9fb;
-    border-radius: 24px;
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #f0e2e6;
-}
-.history-details p {
-    margin: 4px 0;
-    font-size: 13px;
-    color: #4a3b47;
-}
-
-/* Formulaires */
-.auth-form {
-    background: #fff;
-    border-radius: 28px;
-    padding: 20px;
-}
-.auth-form input {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border: 1px solid #f0e2e6;
-    border-radius: 60px;
-    font-family: inherit;
-    background: #fef9fb;
-}
-.auth-form button {
-    background: #b5838a;
-    color: white;
-    border: none;
-    padding: 12px;
-    width: 100%;
-    border-radius: 60px;
-    margin-top: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: inherit;
-}
-.auth-form .social-btn {
-    background: #6d597a;
-    margin-bottom: 12px;
-}
-.auth-form .social-btn:hover {
-    background: #5a485f;
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(2px);
-}
-.modal-content {
-    background: white;
-    max-width: 300px;
-    width: 80%;
-    padding: 24px;
-    border-radius: 40px;
-    text-align: center;
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-}
-.modal-content .close {
-    float: right;
-    font-size: 28px;
-    cursor: pointer;
-    color: #b5838a;
-}
-#modal-close-btn {
-    background: #b5838a;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 40px;
-    margin-top: 16px;
-    cursor: pointer;
-}
-
-/* Messagerie */
-#chat-section, #driver-chat-section {
-    margin-top: 20px;
-    border-top: 1px solid #f0e2e6;
-    padding-top: 16px;
-}
-.chat-messages {
-    background: #fef9fb;
-    border-radius: 24px;
-    padding: 12px;
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 12px;
-}
-.message {
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-}
-.message.sent {
-    align-items: flex-end;
-}
-.message.received {
-    align-items: flex-start;
-}
-.message-bubble {
-    max-width: 80%;
-    padding: 6px 12px;
-    border-radius: 18px;
-    background: #f0e2e6;
-    font-size: 13px;
-    color: #4a3b47;
-}
-.message.sent .message-bubble {
-    background: #b5838a;
-    color: white;
-}
-.message-time {
-    font-size: 9px;
-    color: #b5838a;
-    margin-top: 2px;
-}
-.chat-input-area {
-    display: flex;
-    gap: 8px;
-}
-#chat-input, #driver-chat-input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #f0e2e6;
-    border-radius: 60px;
-    outline: none;
-    font-family: inherit;
-    background: #fef9fb;
-}
-#chat-send-btn, #driver-chat-send-btn {
-    background: #b5838a;
-    color: white;
-    border: none;
-    border-radius: 60px;
-    padding: 0 14px;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-/* Écran de choix de rôle */
-.role-choice-container {
-    text-align: center;
-    padding: 40px 20px;
-}
-.role-choice-buttons {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin: 20px 0;
-}
-.role-choice-btn {
-    background: #f4f4f4;
-    border: none;
-    border-radius: 60px;
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.role-choice-btn:hover {
-    background: #e6c3c3;
-}
-
-/* Courses en attente (conductrice) */
-.pending-rides-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
-}
-.pending-ride-card {
-    background: #fef9fb;
-    border-radius: 24px;
-    padding: 12px;
-    border: 1px solid #f0e2e6;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.pending-ride-card:hover {
-    background: #fff7f9;
-    border-color: #b5838a;
-}
-.pending-ride-card h4 {
-    margin-bottom: 6px;
-    color: #4a3b47;
-}
-.pending-ride-card p {
-    font-size: 12px;
-    color: #b5838a;
-    margin: 4px 0;
-}
-.accept-ride-btn {
-    background: #b5838a;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 30px;
-    margin-top: 8px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-/* Spinner */
-#loading-spinner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #b5838a;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Toast */
-#toast-container {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    pointer-events: none;
-}
-.toast {
-    background: #333;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    max-width: 90%;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.toast.show {
-    opacity: 1;
-}
-
-/* Marqueur conducteur */
-.driver-marker {
-    background: #b5838a;
-    border-radius: 50%;
-    font-size: 24px;
-    text-align: center;
-    line-height: 30px;
-}
-.driver-marker-small {
-    background: #b5838a;
-    border-radius: 50%;
-    font-size: 16px;
-    text-align: center;
-    line-height: 20px;
-}
-
-/* Étoiles de notation */
-.rating-container {
-    margin-top: 8px;
-    text-align: right;
-}
-.star-rating {
-    display: inline-flex;
-    gap: 4px;
-    cursor: pointer;
-}
-.star {
-    font-size: 20px;
-    color: #e4e5e9;
-    transition: color 0.2s;
-}
-.star.filled {
-    color: #ffc107;
-}
-.star-rating:hover .star {
-    color: #ffc107;
-}
-.star-rating .star:hover ~ .star {
-    color: #e4e5e9;
-}
-.rating-container[data-rated="true"] .star-rating {
-    cursor: default;
-}
-.rated-text {
-    font-size: 11px;
-    color: #6c757d;
-    margin-left: 8px;
-}
-.rate-prompt {
-    font-size: 11px;
-    color: #b5838a;
-    margin-left: 8px;
-}
-
-/* Écran d'attente */
-.waiting-container {
-    text-align: center;
-    padding: 40px 20px;
-}
-.waiting-container .spinner {
-    margin: 0 auto 20px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #b5838a;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
-.waiting-container h3 {
-    color: #4a3b47;
-    margin-bottom: 12px;
-}
-.waiting-container p {
-    color: #b5838a;
-    margin-bottom: 24px;
-}
-
-/* Paiement */
-#payment-methods {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-/* Responsive */
-@media (max-width: 550px) {
-    .header-top {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-    }
-    .logo {
-        justify-content: center;
-    }
-    .role-display {
-        text-align: center;
-        margin-left: 0;
-    }
-    .install-button-container {
-        text-align: center;
-        margin-left: 0;
-    }
-    .tabs {
-        justify-content: center;
-    }
-    .tab-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
-    .input-group {
-        padding: 8px 12px;
-    }
-    .input-group input {
-        font-size: 14px;
-    }
-    .location-btn {
-        font-size: 11px;
-    }
-    .ride-options h3 {
-        font-size: 16px;
-    }
-    .ride-card {
-        padding: 10px;
-    }
-    .ride-info h4 {
-        font-size: 14px;
-    }
-    .ride-price {
-        font-size: 14px;
-    }
-    .confirm-btn {
-        padding: 12px;
-        font-size: 13px;
-    }
-    .pending-ride-card {
-        padding: 10px;
-    }
-    .pending-ride-card p {
-        font-size: 11px;
-    }
-    .star {
-        font-size: 18px;
-    }
-}
+        <!-- Modal de paiement -->
+        <div id="payment-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Paiement de la course</h3>
+                <p>Montant : <span id="payment-amount"></span> €</p>
+                <div id="payment-methods">
+                    <button id="pay-stripe-btn" class="confirm-btn">Payer par carte (Stripe)</button>
+                    <button id="pay-paypal-btn" class="confirm-btn" style="background:#0070ba;">PayPal</button>
+                    <button id="pay-googlepay-btn" class="confirm-btn" style="background:#4285f4;">Google Pay</button>
+                    <button id="pay-applepay-btn" class="confirm-btn" style="background:#000000;">Apple Pay</button>
+                </div>
+                <div id="payment-error" style="color:red; margin-top:10px;"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
