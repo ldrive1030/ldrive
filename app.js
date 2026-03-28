@@ -7,6 +7,7 @@
     let pendingRidesListener = null;
     let currentDriverRide = null;
     let pendingRideListener = null;
+    let driverMessagesUnsubscribe = null; // pour arrêter l'écouteur précédent
 
     let driverPosition = null;
     let driverWatchId = null;
@@ -621,19 +622,17 @@
             };
         }
 
-        let notificationShown = false; // Pour éviter les notifications multiples
+        let notificationShown = false;
 
         if (pendingRideListener) pendingRideListener();
         pendingRideListener = db.collection('rides').doc(rideId).onSnapshot((doc) => {
             if (doc.exists) {
                 const ride = doc.data();
                 if (ride.status === 'accepted' || ride.status === 'started') {
-                    // Afficher une notification une seule fois
                     if (!notificationShown) {
                         notificationShown = true;
                         const driverName = ride.driverName || 'une conductrice';
                         showToast(`🎉 Votre course a été acceptée par ${driverName} !`, 5000);
-                        // Optionnel : vibration
                         if (window.navigator && window.navigator.vibrate) {
                             window.navigator.vibrate(200);
                         }
@@ -726,8 +725,14 @@
     }
 
     async function loadMessages(rideId, role) {
+        // Arrêter l'écouteur précédent pour éviter les doublons
+        if (role === 'driver' && driverMessagesUnsubscribe) {
+            driverMessagesUnsubscribe();
+            driverMessagesUnsubscribe = null;
+        }
+
         const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
-        q.onSnapshot((snapshot) => {
+        const unsubscribe = q.onSnapshot((snapshot) => {
             const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
             if (!container) return;
             container.innerHTML = '';
@@ -736,6 +741,9 @@
                 addMessageToChat(msg.text, msg.sender === role ? 'sent' : 'received', new Date(msg.timestamp).toLocaleTimeString(), container);
             });
         });
+        if (role === 'driver') {
+            driverMessagesUnsubscribe = unsubscribe;
+        }
     }
 
     async function sendMessage(rideId, text, senderRole) {
@@ -1452,6 +1460,22 @@
                     }
                     if (tabId === 'driver-account') {
                         if (currentUser) showDriverProfile();
+                    }
+                    if (tabId === 'driver-active') {
+                        // Recharger les messages si une course est active
+                        if (activeRideId && currentUser) {
+                            if (currentDriverRide) {
+                                loadMessages(activeRideId, 'driver');
+                            } else {
+                                // Si currentDriverRide n'est pas défini, le récupérer depuis Firestore
+                                db.collection('rides').doc(activeRideId).get().then(doc => {
+                                    if (doc.exists) {
+                                        currentDriverRide = doc.data();
+                                        loadMessages(activeRideId, 'driver');
+                                    }
+                                });
+                            }
+                        }
                     }
                 });
             });
