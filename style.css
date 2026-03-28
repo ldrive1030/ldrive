@@ -1,3 +1,7 @@
+
+
+
+
 * {
     margin: 0;
     padding: 0;
@@ -10,10 +14,8 @@ body {
     overflow-x: hidden;
 }
 
-
-
 #app {
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto;
     background: #ffffff;
     min-height: 100vh;
@@ -39,6 +41,7 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 8px;
 }
 
@@ -50,13 +53,24 @@ body {
     font-weight: 600;
     letter-spacing: -0.5px;
 }
-
-
-.logo-icon {
-    width: 40px;
-    height: auto;
+.logo a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
 }
-
+.logo-icon {
+    font-size: 28px;
+    background: #fae1e7;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 30px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
 .logo-text {
     background: linear-gradient(135deg, #b5838a, #6d597a);
     background-clip: text;
@@ -73,6 +87,37 @@ body {
     border-radius: 40px;
     font-size: 14px;
     font-weight: 500;
+}
+
+.role-display {
+    margin-left: auto;
+}
+
+.install-button-container {
+    margin-left: 8px;
+}
+.install-btn {
+    background: rgba(255,255,255,0.8);
+    border: 1px solid #e0d4d9;
+    border-radius: 40px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6d597a;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+}
+.install-btn:hover {
+    background: #b5838a;
+    color: white;
+    border-color: #b5838a;
+}
+.install-icon {
+    font-size: 14px;
 }
 
 .tabs {
@@ -95,7 +140,6 @@ body {
     transition: all 0.2s;
     border-radius: 40px;
 }
-
 .tab-btn.active {
     color: #6d597a;
     background-color: #ffffff;
@@ -107,7 +151,6 @@ body {
     padding: 20px 16px;
     animation: fade 0.25s ease;
 }
-
 .tab-pane.active {
     display: block;
 }
@@ -127,7 +170,6 @@ body {
     padding: 4px;
     width: fit-content;
 }
-
 .time-option {
     padding: 8px 20px;
     border: none;
@@ -138,13 +180,11 @@ body {
     transition: 0.2s;
     color: #b5838a;
 }
-
 .time-option.active {
     background: white;
     color: #6d597a;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
-
 .datetime-picker input {
     padding: 10px;
     border: 1px solid #f0dbe0;
@@ -159,22 +199,19 @@ body {
     border-radius: 24px;
     margin-bottom: 20px;
 }
-
 .input-group {
     display: flex;
     align-items: center;
     gap: 12px;
     background: #fef9fb;
-    padding: 12px 18px;
+    padding: 10px 14px;
     border-radius: 60px;
     margin-bottom: 12px;
     border: 1px solid #f7e7ec;
 }
-
 .input-group .icon {
-    font-size: 20px;
+    font-size: 18px;
 }
-
 .input-group input {
     flex: 1;
     border: none;
@@ -183,14 +220,13 @@ body {
     outline: none;
     font-family: inherit;
 }
-
 .location-btn {
     background: none;
     border: none;
     color: #b5838a;
     font-weight: 500;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 #map {
@@ -207,11 +243,10 @@ body {
     color: #4a3b47;
     font-weight: 600;
 }
-
 .ride-card {
     background: #fef9fb;
     border-radius: 28px;
-    padding: 14px;
+    padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -219,50 +254,43 @@ body {
     transition: all 0.2s;
     cursor: pointer;
 }
-
 .ride-card.selected {
     border-color: #b5838a;
     background: #fff7f9;
     box-shadow: 0 4px 12px rgba(181,131,138,0.1);
 }
-
 .ride-info h4 {
-    font-size: 18px;
+    font-size: 16px;
     margin-bottom: 4px;
     color: #4a3b47;
 }
-
 .ride-info p {
-    font-size: 13px;
+    font-size: 12px;
     color: #b5838a;
 }
-
 .ride-price {
     font-weight: bold;
-    font-size: 18px;
+    font-size: 16px;
     color: #6d597a;
 }
-
 .confirm-btn {
     width: 100%;
     background: #b5838a;
     color: white;
     border: none;
-    padding: 16px;
+    padding: 14px;
     border-radius: 60px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 14px;
     margin-top: 20px;
     cursor: pointer;
     transition: all 0.2s;
     font-family: inherit;
 }
-
 .confirm-btn:disabled {
     background: #e1cbd0;
     cursor: not-allowed;
 }
-
 .confirm-btn:not(:disabled):hover {
     background: #9f6f78;
     transform: scale(0.98);
@@ -275,20 +303,18 @@ body {
     flex-direction: column;
     gap: 12px;
 }
-
 .history-item {
     background: #fef9fb;
     border-radius: 24px;
-    padding: 14px;
+    padding: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border: 1px solid #f0e2e6;
 }
-
 .history-details p {
     margin: 4px 0;
-    font-size: 14px;
+    font-size: 13px;
     color: #4a3b47;
 }
 
@@ -298,23 +324,21 @@ body {
     border-radius: 28px;
     padding: 20px;
 }
-
 .auth-form input {
     display: block;
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     margin: 8px 0;
     border: 1px solid #f0e2e6;
     border-radius: 60px;
     font-family: inherit;
     background: #fef9fb;
 }
-
 .auth-form button {
     background: #b5838a;
     color: white;
     border: none;
-    padding: 14px;
+    padding: 12px;
     width: 100%;
     border-radius: 60px;
     margin-top: 8px;
@@ -322,12 +346,10 @@ body {
     cursor: pointer;
     font-family: inherit;
 }
-
 .auth-form .social-btn {
     background: #6d597a;
     margin-bottom: 12px;
 }
-
 .auth-form .social-btn:hover {
     background: #5a485f;
 }
@@ -344,7 +366,6 @@ body {
     z-index: 1000;
     backdrop-filter: blur(2px);
 }
-
 .modal-content {
     background: white;
     max-width: 300px;
@@ -354,14 +375,12 @@ body {
     text-align: center;
     box-shadow: 0 20px 30px rgba(0,0,0,0.1);
 }
-
 .modal-content .close {
     float: right;
     font-size: 28px;
     cursor: pointer;
     color: #b5838a;
 }
-
 #modal-close-btn {
     background: #b5838a;
     color: white;
@@ -381,13 +400,13 @@ body {
 .chat-messages {
     background: #fef9fb;
     border-radius: 24px;
-    padding: 14px;
+    padding: 12px;
     max-height: 200px;
     overflow-y: auto;
     margin-bottom: 12px;
 }
 .message {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: flex;
     flex-direction: column;
 }
@@ -399,10 +418,10 @@ body {
 }
 .message-bubble {
     max-width: 80%;
-    padding: 8px 14px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: 18px;
     background: #f0e2e6;
-    font-size: 14px;
+    font-size: 13px;
     color: #4a3b47;
 }
 .message.sent .message-bubble {
@@ -410,9 +429,9 @@ body {
     color: white;
 }
 .message-time {
-    font-size: 10px;
+    font-size: 9px;
     color: #b5838a;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 .chat-input-area {
     display: flex;
@@ -420,7 +439,7 @@ body {
 }
 #chat-input, #driver-chat-input {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     border: 1px solid #f0e2e6;
     border-radius: 60px;
     outline: none;
@@ -432,7 +451,7 @@ body {
     color: white;
     border: none;
     border-radius: 60px;
-    padding: 0 18px;
+    padding: 0 14px;
     cursor: pointer;
     font-weight: 600;
 }
@@ -471,7 +490,7 @@ body {
 .pending-ride-card {
     background: #fef9fb;
     border-radius: 24px;
-    padding: 14px;
+    padding: 12px;
     border: 1px solid #f0e2e6;
     cursor: pointer;
     transition: 0.2s;
@@ -485,7 +504,7 @@ body {
     color: #4a3b47;
 }
 .pending-ride-card p {
-    font-size: 13px;
+    font-size: 12px;
     color: #b5838a;
     margin: 4px 0;
 }
@@ -493,7 +512,7 @@ body {
     background: #b5838a;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: 30px;
     margin-top: 8px;
     cursor: pointer;
@@ -542,9 +561,9 @@ body {
 .toast {
     background: #333;
     color: white;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 40px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -584,7 +603,7 @@ body {
     cursor: pointer;
 }
 .star {
-    font-size: 22px;
+    font-size: 20px;
     color: #e4e5e9;
     transition: color 0.2s;
 }
@@ -601,12 +620,12 @@ body {
     cursor: default;
 }
 .rated-text {
-    font-size: 12px;
+    font-size: 11px;
     color: #6c757d;
     margin-left: 8px;
 }
 .rate-prompt {
-    font-size: 12px;
+    font-size: 11px;
     color: #b5838a;
     margin-left: 8px;
 }
@@ -644,138 +663,61 @@ body {
 
 /* Responsive */
 @media (max-width: 550px) {
-
     .header-top {
         flex-direction: column;
-        gap: 10px;
         align-items: stretch;
-    }
-    .tabs {
-        justify-content: center;
+        gap: 8px;
     }
     .logo {
         justify-content: center;
     }
+    .role-display {
+        text-align: center;
+        margin-left: 0;
+    }
+    .install-button-container {
+        text-align: center;
+        margin-left: 0;
+    }
+    .tabs {
+        justify-content: center;
+    }
     .tab-btn {
-        padding: 6px 14px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    .input-group {
+        padding: 8px 12px;
+    }
+    .input-group input {
+        font-size: 14px;
+    }
+    .location-btn {
+        font-size: 11px;
+    }
+    .ride-options h3 {
+        font-size: 16px;
+    }
+    .ride-card {
+        padding: 10px;
+    }
+    .ride-info h4 {
+        font-size: 14px;
+    }
+    .ride-price {
+        font-size: 14px;
+    }
+    .confirm-btn {
+        padding: 12px;
         font-size: 13px;
     }
-    .role-choice-buttons {
-        flex-direction: column;
-        align-items: center;
+    .pending-ride-card {
+        padding: 10px;
     }
-}
-
-
-.super-icon {
-	color: blue;
-}
-
-/* Onglets d'authentification */
-.auth-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    background: #f0e2e6;
-    padding: 4px;
-    border-radius: 50px;
-}
-.auth-tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: 10px;
-    border-radius: 40px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    color: #b5838a;
-}
-.auth-tab.active {
-    background: white;
-    color: #6d597a;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.auth-pane {
-    display: none;
-}
-.auth-pane.active {
-    display: block;
-}
-.auth-divider {
-    text-align: center;
-    margin: 12px 0;
-    color: #b5838a;
-    font-size: 14px;
-}
-
-/* Nouveaux styles pour l'authentification simplifiée */
-.auth-choice-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 20px;
-}
-.auth-choice-btn {
-    background: #b5838a;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 60px;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.auth-choice-btn:hover {
-    background: #9f6f78;
-    transform: scale(0.98);
-}
-.simple-form {
-    max-width: 400px;
-    margin: 0 auto;
-}
-.simple-form h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #4a3b47;
-}
-.simple-form input {
-    margin-bottom: 12px;
-}
-.auth-divider {
-    text-align: center;
-    margin: 12px 0;
-    color: #b5838a;
-    font-size: 14px;
-}
-
-
-.install-button-container {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-}
-.install-btn {
-    background: rgba(255,255,255,0.8);
-    border: 1px solid #e0d4d9;
-    border-radius: 40px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6d597a;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    backdrop-filter: blur(4px);
-}
-.install-btn:hover {
-    background: #b5838a;
-    color: white;
-    border-color: #b5838a;
-}
-.install-icon {
-    font-size: 16px;
+    .pending-ride-card p {
+        font-size: 11px;
+    }
+    .star {
+        font-size: 18px;
+    }
 }
