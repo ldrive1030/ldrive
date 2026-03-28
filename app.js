@@ -1,7 +1,3 @@
-
-
-
-
 (function() {
     // ==================== VARIABLES GLOBALES ====================
     let currentUser = null;
@@ -625,11 +621,23 @@
             };
         }
 
+        let notificationShown = false; // Pour éviter les notifications multiples
+
         if (pendingRideListener) pendingRideListener();
         pendingRideListener = db.collection('rides').doc(rideId).onSnapshot((doc) => {
             if (doc.exists) {
                 const ride = doc.data();
                 if (ride.status === 'accepted' || ride.status === 'started') {
+                    // Afficher une notification une seule fois
+                    if (!notificationShown) {
+                        notificationShown = true;
+                        const driverName = ride.driverName || 'une conductrice';
+                        showToast(`🎉 Votre course a été acceptée par ${driverName} !`, 5000);
+                        // Optionnel : vibration
+                        if (window.navigator && window.navigator.vibrate) {
+                            window.navigator.vibrate(200);
+                        }
+                    }
                     activeRideId = rideId;
                     displayClientTracking(ride, rideId);
                     showClientTab('tracking');
