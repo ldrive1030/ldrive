@@ -105,13 +105,86 @@
         }, duration);
     }
 
+    // ==================== AUTOCOMPLÉTION POUR LES ADRESSES ====================
+    async function initAddressAutocomplete(inputElement, setCoordsCallback) {
+        if (!inputElement) return;
+
+        let debounceTimer;
+        let currentSuggestions = [];
+
+        // Créer le conteneur pour les suggestions
+        let suggestionContainer = inputElement.parentNode.querySelector('.autocomplete-suggestions');
+        if (!suggestionContainer) {
+            suggestionContainer = document.createElement('div');
+            suggestionContainer.className = 'autocomplete-suggestions';
+            inputElement.parentNode.style.position = 'relative';
+            inputElement.parentNode.appendChild(suggestionContainer);
+        }
+
+        inputElement.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length < 3) {
+                suggestionContainer.innerHTML = '';
+                suggestionContainer.style.display = 'none';
+                return;
+            }
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`
+                    );
+                    const data = await response.json();
+                    currentSuggestions = data;
+
+                    if (data.length === 0) {
+                        suggestionContainer.innerHTML = '<div class="suggestion-item no-result">Aucun résultat</div>';
+                        suggestionContainer.style.display = 'block';
+                        return;
+                    }
+
+                    suggestionContainer.innerHTML = data.map(place => `
+                        <div class="suggestion-item" data-lat="${place.lat}" data-lon="${place.lon}" data-display="${place.display_name.replace(/"/g, '&quot;')}">
+                            ${place.display_name}
+                        </div>
+                    `).join('');
+                    suggestionContainer.style.display = 'block';
+
+                    // Attacher les événements de clic
+                    document.querySelectorAll('.suggestion-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const lat = parseFloat(item.dataset.lat);
+                            const lon = parseFloat(item.dataset.lon);
+                            const displayName = item.dataset.display;
+                            inputElement.value = displayName;
+                            suggestionContainer.innerHTML = '';
+                            suggestionContainer.style.display = 'none';
+                            setCoordsCallback({ lat, lng: lon });
+                        });
+                    });
+                } catch (error) {
+                    console.error('Erreur autocomplétion:', error);
+                }
+            }, 300);
+        });
+
+        // Fermer les suggestions si on clique ailleurs
+        document.addEventListener('click', (e) => {
+            if (!inputElement.contains(e.target) && suggestionContainer && !suggestionContainer.contains(e.target)) {
+                suggestionContainer.innerHTML = '';
+                suggestionContainer.style.display = 'none';
+            }
+        });
+    }
+
     // ==================== MAP & LOCATION (fonctions) ====================
     function initMap() {
         if (map) return;
         const mapElement = document.getElementById('map');
         if (!mapElement) return;
 
-        // Centre par défaut : Bruxelles
+        // Centrer sur Bruxelles
         map = L.map('map').setView([50.8503, 4.3517], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
@@ -1199,6 +1272,19 @@
                 }
             });
         }
+
+        // Initialisation de l'autocomplétion
+        initAddressAutocomplete(pickupInput, (coords) => {
+            pickupCoords = coords;
+            if (pickupMarker) pickupMarker.setLatLng([coords.lat, coords.lng]);
+            if (map) map.setView([coords.lat, coords.lng], 14);
+            updateRidePrice();
+        });
+        initAddressAutocomplete(dropoffInput, (coords) => {
+            dropoffCoords = coords;
+            if (dropoffMarker) dropoffMarker.setLatLng([coords.lat, coords.lng]);
+            updateRidePrice();
+        });
 
         // Confirmer course
         if (confirmBtn) {
