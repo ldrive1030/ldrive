@@ -111,15 +111,16 @@
         const mapElement = document.getElementById('map');
         if (!mapElement) return;
 
-        map = L.map('map').setView([48.8566, 2.3522], 13);
+        // Centre par défaut : Bruxelles
+        map = L.map('map').setView([50.8503, 4.3517], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
         requestUserLocation();
 
-        pickupMarker = L.marker([48.8566, 2.3522], { draggable: true, icon: orangeIcon }).addTo(map);
-        dropoffMarker = L.marker([48.8566, 2.3522 + 0.02], { draggable: true, icon: blueIcon }).addTo(map);
+        pickupMarker = L.marker([50.8503, 4.3517], { draggable: true, icon: orangeIcon }).addTo(map);
+        dropoffMarker = L.marker([50.8503, 4.3517 + 0.02], { draggable: true, icon: blueIcon }).addTo(map);
 
         pickupMarker.on('dragend', (e) => {
             const latlng = e.target.getLatLng();
@@ -171,7 +172,7 @@
                     default:
                         message = 'Erreur de géolocalisation.';
                 }
-                showToast(message + ' Carte centrée sur Paris.', 5000);
+                showToast(message + ' Carte centrée sur Bruxelles.', 5000);
             }
         );
     }
@@ -244,9 +245,10 @@
         dropoffCoords = null;
         updateRidePrice();
         if (map) {
-            map.setView([48.8566, 2.3522], 13);
-            if (pickupMarker) pickupMarker.setLatLng([48.8566, 2.3522]);
-            if (dropoffMarker) dropoffMarker.setLatLng([48.8566, 2.3522 + 0.02]);
+            // Revenir au centre Bruxelles après annulation ou fin de course
+            map.setView([50.8503, 4.3517], 13);
+            if (pickupMarker) pickupMarker.setLatLng([50.8503, 4.3517]);
+            if (dropoffMarker) dropoffMarker.setLatLng([50.8503, 4.3517 + 0.02]);
         }
     }
 
@@ -978,7 +980,9 @@
             driverTrackingMap.driverMarker = null;
         }
 
-        loadMessages(rideId, 'driver');
+        setTimeout(() => {
+            loadMessages(rideId, 'driver');
+        }, 100);
     }
 
     async function loadDriverHistory() {
@@ -1132,7 +1136,6 @@
         installBtn = document.getElementById('install-app-btn');
 
         // ==================== GESTION DU BOUTON D'INSTALLATION ====================
-        // Le bouton est toujours visible
         if (installBtn) {
             installBtn.style.display = 'flex';
         }
