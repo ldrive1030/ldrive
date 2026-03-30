@@ -60,7 +60,7 @@ body {
     font-size: 28px;
     background: #fae1e7;
     width: 40px;
-    height: auto;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,10 +89,10 @@ body {
     margin-left: auto;
 }
 
-.install-button-container {
+.install-button-container, .logout-button-container {
     margin-left: 8px;
 }
-.install-btn {
+.install-btn, .logout-btn {
     background: rgba(255,255,255,0.8);
     border: 1px solid #e0d4d9;
     border-radius: 40px;
@@ -112,7 +112,12 @@ body {
     color: white;
     border-color: #b5838a;
 }
-.install-icon {
+.logout-btn:hover {
+    background: #e6c3c3;
+    color: #5e3a3a;
+    border-color: #b5838a;
+}
+.install-icon, .logout-icon {
     font-size: 14px;
 }
 
@@ -416,8 +421,6 @@ body {
     cursor: pointer;
 }
 
-
-
 /* Messagerie - Nouveau design */
 #chat-section, #driver-chat-section {
     margin-top: 20px;
@@ -427,7 +430,6 @@ body {
     border-radius: 24px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
-
 .chat-header {
     display: flex;
     align-items: center;
@@ -435,7 +437,6 @@ body {
     margin-bottom: 12px;
     padding: 0 4px;
 }
-
 .chat-header-icon {
     font-size: 20px;
     background: #fae1e7;
@@ -446,13 +447,11 @@ body {
     justify-content: center;
     border-radius: 50%;
 }
-
 .chat-header h3 {
     font-size: 16px;
     color: #4a3b47;
     margin: 0;
 }
-
 .chat-messages {
     background: #fef9fb;
     border-radius: 20px;
@@ -464,23 +463,19 @@ body {
     flex-direction: column;
     gap: 8px;
 }
-
 .message {
     display: flex;
     flex-direction: column;
     max-width: 85%;
 }
-
 .message.sent {
     align-self: flex-end;
     align-items: flex-end;
 }
-
 .message.received {
     align-self: flex-start;
     align-items: flex-start;
 }
-
 .message-bubble {
     padding: 10px 14px;
     border-radius: 20px;
@@ -489,19 +484,16 @@ body {
     word-wrap: break-word;
     max-width: 100%;
 }
-
 .message.sent .message-bubble {
     background: #b5838a;
     color: white;
     border-bottom-right-radius: 4px;
 }
-
 .message.received .message-bubble {
     background: #f0e2e6;
     color: #4a3b47;
     border-bottom-left-radius: 4px;
 }
-
 .message-time {
     font-size: 10px;
     color: #b5838a;
@@ -509,7 +501,6 @@ body {
     margin-left: 8px;
     margin-right: 8px;
 }
-
 .chat-input-area {
     display: flex;
     gap: 8px;
@@ -519,7 +510,6 @@ body {
     padding: 4px 4px 4px 16px;
     border: 1px solid #f0e2e6;
 }
-
 #chat-input, #driver-chat-input {
     flex: 1;
     padding: 10px 0;
@@ -529,7 +519,6 @@ body {
     outline: none;
     font-family: inherit;
 }
-
 #chat-send-btn, #driver-chat-send-btn {
     background: #b5838a;
     color: white;
@@ -540,13 +529,10 @@ body {
     font-weight: 500;
     transition: all 0.2s;
 }
-
 #chat-send-btn:hover, #driver-chat-send-btn:hover {
     background: #9f6f78;
     transform: scale(0.98);
 }
-
-
 
 /* Écran de choix de rôle */
 .role-choice-container {
@@ -767,9 +753,13 @@ body {
         text-align: center;
         margin-left: 0;
     }
-    .install-button-container {
+    .install-button-container, .logout-button-container {
         text-align: center;
         margin-left: 0;
+    }
+    .install-btn, .logout-btn {
+        width: 100%;
+        justify-content: center;
     }
     .tabs {
         justify-content: center;
