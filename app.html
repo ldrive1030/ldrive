@@ -117,18 +117,22 @@
                         <p><strong>Véhicule :</strong> <span id="vehicle-info">---</span></p>
                         <p><strong>Temps d'attente estimé :</strong> <span id="eta">---</span></p>
                     </div>
-                    <div id="chat-section">
-                        <h3>Messagerie avec la conductrice</h3>
-                        <div id="chat-messages" class="chat-messages"></div>
-                        <div class="chat-input-area">
-                            <input type="text" id="chat-input" placeholder="Votre message..." autocomplete="off">
-                            <button id="chat-send-btn">Envoyer</button>
-                        </div>
-                    </div>
-                    <button id="complete-ride-btn" class="confirm-btn" style="background: #b5838a;">Terminer la course</button>
-                    <button id="cancel-ride-btn" class="confirm-btn" style="background: #e6c3c3; color:#5e3a3a; margin-top: 8px;">Annuler</button>
-                </div>
-            </div>
+ 
+ 
+ <div id="chat-section">
+    <div class="chat-header">
+        <div class="chat-header-icon">💬</div>
+        <h3>Messagerie avec la conductrice</h3>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Votre message..." autocomplete="off">
+        <button id="chat-send-btn">Envoyer</button>
+    </div>
+</div>
+ 
+ 
+ 
 
             <div id="activity-tab" class="tab-pane">
                 <h2>Vos activités récentes</h2>
@@ -154,13 +158,24 @@
                         <p><strong>Trajet :</strong> <span id="driver-route">---</span></p>
                         <p><strong>Statut :</strong> <span id="driver-status-text">---</span></p>
                     </div>
-                    <div id="driver-chat-section">
-                        <h3>Messagerie avec la cliente</h3>
-                        <div id="driver-chat-messages" class="chat-messages"></div>
-                        <div class="chat-input-area">
-                            <input type="text" id="driver-chat-input" placeholder="Votre message..." autocomplete="off">
-                            <button id="driver-chat-send-btn">Envoyer</button>
-                        </div>
+ 
+ 
+ <div id="driver-chat-section">
+    <div class="chat-header">
+        <div class="chat-header-icon">💬</div>
+        <h3>Messagerie avec la cliente</h3>
+    </div>
+    <div id="driver-chat-messages" class="chat-messages"></div>
+    <div class="chat-input-area">
+        <input type="text" id="driver-chat-input" placeholder="Votre message..." autocomplete="off">
+        <button id="driver-chat-send-btn">Envoyer</button>
+    </div>
+</div>
+ 
+ 
+ 
+ 
+ 
                     </div>
                     <button id="driver-go-to-pickup-btn" class="confirm-btn" style="background: #b5838a;">📍 Aller à la cliente</button>
                     <button id="driver-start-ride-btn" class="confirm-btn" style="background: #b5838a;">🚗 Démarrer la course</button>
