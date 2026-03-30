@@ -1170,7 +1170,8 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Récupération des éléments DOM
         clientTabs = document.getElementById('client-tabs');
-        driverTabs = document.getElementById('driver-tabs');
+        driverTabs = document.getElementById('driver-tabs').style.display;
+		console.log('driverTabs trouvé:', driverTabs);
         ridesTab = document.getElementById('rides-tab');
         trackingTab = document.getElementById('tracking-tab');
         activityTab = document.getElementById('activity-tab');
@@ -1558,36 +1559,57 @@
         }
 
         // Onglets conductrice
-        if (driverTabs) {
-            document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (currentRole !== 'driver') return;
-                    const tabId = btn.dataset.tab;
-                    showDriverTab(tabId);
-                    if (tabId === 'driver-history') {
-                        if (currentUser) loadDriverHistory();
-                        else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
-                    }
-                    if (tabId === 'driver-account') {
-                        if (currentUser) showDriverProfile();
-                    }
-                    if (tabId === 'driver-active') {
-                        if (activeRideId && currentUser) {
-                            if (currentDriverRide) {
+// Onglets conductrice
+if (driverTabs) {
+    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log('Clic sur onglet conductrice:', btn.dataset.tab);
+            if (currentRole !== 'driver') {
+                console.log('Rôle incorrect:', currentRole);
+                showToast('Vous n\'êtes pas en mode conductrice.');
+                return;
+            }
+            const tabId = btn.dataset.tab;
+            console.log('Affichage onglet:', tabId);
+            showDriverTab(tabId);
+            if (tabId === 'driver-history') {
+                if (currentUser) {
+                    loadDriverHistory();
+                } else {
+                    document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
+                }
+            }
+            if (tabId === 'driver-account') {
+                if (currentUser) {
+                    showDriverProfile();
+                } else {
+                    // Si non connecté, afficher l'écran de connexion conductrice
+                    showDriverLoginSignup();
+                }
+            }
+            if (tabId === 'driver-active') {
+                if (activeRideId && currentUser) {
+                    if (currentDriverRide) {
+                        loadMessages(activeRideId, 'driver');
+                    } else {
+                        db.collection('rides').doc(activeRideId).get().then(doc => {
+                            if (doc.exists) {
+                                currentDriverRide = doc.data();
                                 loadMessages(activeRideId, 'driver');
-                            } else {
-                                db.collection('rides').doc(activeRideId).get().then(doc => {
-                                    if (doc.exists) {
-                                        currentDriverRide = doc.data();
-                                        loadMessages(activeRideId, 'driver');
-                                    }
-                                });
                             }
-                        }
+                        });
                     }
-                });
-            });
-        }
+                }
+            }
+            if (tabId === 'driver-requests') {
+                // Recharger les courses disponibles
+                if (currentUser) {
+                    listenForPendingRides();
+                }
+            }
+        });
+    });
+}
 
         // Carte client
         setTimeout(() => {
