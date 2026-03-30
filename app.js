@@ -73,7 +73,8 @@
         bookingDiv, waitingDiv,
         paymentModal, paymentAmountSpan, payStripeBtn, payPaypalBtn, payGooglepayBtn, payApplepayBtn, paymentErrorDiv,
         authPanel,
-        installBtn;
+        installBtn,
+        logoutBtn;
 
     // ==================== MAP & LOCATION ====================
     let map, pickupMarker, dropoffMarker;
@@ -109,7 +110,7 @@
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
         try {
-           const audio = new Audio('sounds/ma-notification.mp3');
+            const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
             audio.volume = 0.5;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
@@ -156,12 +157,7 @@
                     }
 
                     suggestionContainer.innerHTML = data.map(place => `
-                        <div class="suggestion-item" data-lat="${place.lat}" data-lon="${place.lon}" data-display="${place.display_name.replace(/[&<>]/g, function(m) {
-                            if (m === '&') return '&amp;';
-                            if (m === '<') return '&lt;';
-                            if (m === '>') return '&gt;';
-                            return m;
-                        })}">
+                        <div class="suggestion-item" data-lat="${place.lat}" data-lon="${place.lon}" data-display="${escapeHtml(place.display_name)}">
                             ${escapeHtml(place.display_name)}
                         </div>
                     `).join('');
@@ -198,7 +194,6 @@
         const mapElement = document.getElementById('map');
         if (!mapElement) return;
 
-        // Centre par défaut : Bruxelles
         map = L.map('map').setView([50.8503, 4.3517], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
@@ -367,9 +362,17 @@
         }
     }
 
+    // ==================== AFFICHAGE BOUTON DÉCONNEXION ====================
+    function updateLogoutButton() {
+        if (logoutBtn) {
+            logoutBtn.style.display = currentUser ? 'flex' : 'none';
+        }
+    }
+
     // ==================== AUTHENTIFICATION & RÔLE ====================
     auth.onAuthStateChanged(async (user) => {
         currentUser = user;
+        updateLogoutButton();
         if (user) {
             const userRef = db.collection('users').doc(user.uid);
             const userDoc = await userRef.get();
@@ -955,7 +958,6 @@
             snapshot.forEach(doc => {
                 pendingList.push({ id: doc.id, ...doc.data() });
             });
-            // Notification sonore si une nouvelle course apparaît
             if (pendingList.length > previousPendingCount) {
                 playNotificationSound();
             }
@@ -1170,8 +1172,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Récupération des éléments DOM
         clientTabs = document.getElementById('client-tabs');
-        driverTabs = document.getElementById('driver-tabs').style.display;
-		console.log('driverTabs trouvé:', driverTabs);
+        driverTabs = document.getElementById('driver-tabs');
         ridesTab = document.getElementById('rides-tab');
         trackingTab = document.getElementById('tracking-tab');
         activityTab = document.getElementById('activity-tab');
@@ -1226,6 +1227,7 @@
         paymentErrorDiv = document.getElementById('payment-error');
         authPanel = document.getElementById('auth-panel');
         installBtn = document.getElementById('install-app-btn');
+        logoutBtn = document.getElementById('logout-btn-header');
 
         // ==================== GESTION DU BOUTON D'INSTALLATION ====================
         if (installBtn) {
@@ -1249,6 +1251,24 @@
                     deferredPrompt = null;
                 } else {
                     showToast('Pour installer l’application, utilisez le menu de votre navigateur : "Ajouter à l’écran d’accueil".');
+                }
+            });
+        }
+
+        // ==================== GESTION DU BOUTON DE DÉCONNEXION ====================
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                showLoading();
+                try {
+                    await auth.signOut();
+                    showToast('Déconnexion réussie');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } catch (error) {
+                    showToast('Erreur lors de la déconnexion : ' + error.message);
+                } finally {
+                    hideLoading();
                 }
             });
         }
@@ -1559,57 +1579,36 @@
         }
 
         // Onglets conductrice
-// Onglets conductrice
-if (driverTabs) {
-    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            console.log('Clic sur onglet conductrice:', btn.dataset.tab);
-            if (currentRole !== 'driver') {
-                console.log('Rôle incorrect:', currentRole);
-                showToast('Vous n\'êtes pas en mode conductrice.');
-                return;
-            }
-            const tabId = btn.dataset.tab;
-            console.log('Affichage onglet:', tabId);
-            showDriverTab(tabId);
-            if (tabId === 'driver-history') {
-                if (currentUser) {
-                    loadDriverHistory();
-                } else {
-                    document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
-                }
-            }
-            if (tabId === 'driver-account') {
-                if (currentUser) {
-                    showDriverProfile();
-                } else {
-                    // Si non connecté, afficher l'écran de connexion conductrice
-                    showDriverLoginSignup();
-                }
-            }
-            if (tabId === 'driver-active') {
-                if (activeRideId && currentUser) {
-                    if (currentDriverRide) {
-                        loadMessages(activeRideId, 'driver');
-                    } else {
-                        db.collection('rides').doc(activeRideId).get().then(doc => {
-                            if (doc.exists) {
-                                currentDriverRide = doc.data();
-                                loadMessages(activeRideId, 'driver');
-                            }
-                        });
+        if (driverTabs) {
+            document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentRole !== 'driver') return;
+                    const tabId = btn.dataset.tab;
+                    showDriverTab(tabId);
+                    if (tabId === 'driver-history') {
+                        if (currentUser) loadDriverHistory();
+                        else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
                     }
-                }
-            }
-            if (tabId === 'driver-requests') {
-                // Recharger les courses disponibles
-                if (currentUser) {
-                    listenForPendingRides();
-                }
-            }
-        });
-    });
-}
+                    if (tabId === 'driver-account') {
+                        if (currentUser) showDriverProfile();
+                    }
+                    if (tabId === 'driver-active') {
+                        if (activeRideId && currentUser) {
+                            if (currentDriverRide) {
+                                loadMessages(activeRideId, 'driver');
+                            } else {
+                                db.collection('rides').doc(activeRideId).get().then(doc => {
+                                    if (doc.exists) {
+                                        currentDriverRide = doc.data();
+                                        loadMessages(activeRideId, 'driver');
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+        }
 
         // Carte client
         setTimeout(() => {
