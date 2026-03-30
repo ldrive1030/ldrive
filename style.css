@@ -60,7 +60,7 @@ body {
     font-size: 28px;
     background: #fae1e7;
     width: 40px;
-    height: 40px;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
