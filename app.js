@@ -112,7 +112,7 @@
 
     // ==================== GOOGLE SHEETS SYNC ====================
     async function sendToGoogleSheets(rideData) {
-        if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === 'https://script.google.com/macros/s/VOTRE_ID/exec') {
+        if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec') {
             console.log('Google Sheets URL non configurée');
             return;
         }
