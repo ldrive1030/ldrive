@@ -1,10 +1,4 @@
-
-
-
-
-
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +6,6 @@
     <meta name="theme-color" content="#f9f0f5">
     <meta name="description" content="Ldrive - Transport entre femmes, en toute sécurité">
     <link rel="manifest" href="manifest.json">
-	<link rel="icon" type="image/png" href="img/favicon.png">
     <title>Ldrive - Entre femmes</title>
     <!-- Leaflet CSS/JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -45,7 +38,7 @@
             <div class="header-top">
                 <div class="logo">
                     <a href="index.html" style="text-decoration: none;">
-                        <span class="logo-icon"><img src="img/logo-icon.png" alt="Logo" class="logo-icon"></span>
+                        <span class="logo-icon">🚗</span>
                         <span class="logo-text">Ldrive</span>
                     </a>
                 </div>
@@ -163,14 +156,14 @@
                     <h2>Course en cours</h2>
                     <div id="driver-tracking-map" style="height: 250px; margin-bottom: 16px;"></div>
                     <div id="driver-tracking-status">
-                        <p><strong>Passagère :</strong> <span id="driver-client-name">---</span></p>
+                        <p><strong>Cliente :</strong> <span id="driver-client-name">---</span></p>
                         <p><strong>Trajet :</strong> <span id="driver-route">---</span></p>
                         <p><strong>Statut :</strong> <span id="driver-status-text">---</span></p>
                     </div>
                     <div id="driver-chat-section">
                         <div class="chat-header">
                             <div class="chat-header-icon">💬</div>
-                            <h3>Messagerie avec la Passagère</h3>
+                            <h3>Messagerie avec la cliente</h3>
                         </div>
                         <div id="driver-chat-messages" class="chat-messages"></div>
                         <div class="chat-input-area">
@@ -178,7 +171,7 @@
                             <button id="driver-chat-send-btn">Envoyer</button>
                         </div>
                     </div>
-                    <button id="driver-go-to-pickup-btn" class="confirm-btn" style="background: #b5838a;">📍 Aller à la Passagère</button>
+                    <button id="driver-go-to-pickup-btn" class="confirm-btn" style="background: #b5838a;">📍 Aller à la cliente</button>
                     <button id="driver-start-ride-btn" class="confirm-btn" style="background: #b5838a;">🚗 Démarrer la course</button>
                     <button id="driver-complete-ride-btn" class="confirm-btn" style="background: #28a745;">Terminer la course</button>
                     <button id="driver-cancel-ride-btn" class="confirm-btn" style="background: #e6c3c3; color:#5e3a3a; margin-top: 8px;">Annuler</button>
