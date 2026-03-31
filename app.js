@@ -111,25 +111,31 @@
     }
 
     // ==================== GOOGLE SHEETS SYNC ====================
-    async function sendToGoogleSheets(rideData) {
-        if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec') {
-            console.log('Google Sheets URL non configurée');
-            return;
-        }
-        try {
-            const response = await fetch(GOOGLE_SHEETS_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(rideData)
-            });
-            const result = await response.json();
-            console.log('Données envoyées à Google Sheets:', result);
-        } catch (error) {
-            console.error('Erreur lors de l’envoi à Google Sheets:', error);
-        }
+async function sendToGoogleSheets(rideData) {
+    if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec') {
+        console.log('Google Sheets URL non configurée');
+        return;
     }
+    
+    const formData = new URLSearchParams();
+    for (const [key, value] of Object.entries(rideData)) {
+        formData.append(key, value);
+    }
+    
+    try {
+        const response = await fetch(GOOGLE_SHEETS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString()
+        });
+        const result = await response.json();
+        console.log('Réponse Google Sheets:', result);
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
+}
 
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
