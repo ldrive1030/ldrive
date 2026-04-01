@@ -110,7 +110,7 @@
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
         try {
-            const audio = new Audio(('sounds/ma-notification.mp3');
+            const audio = new Audio('sounds/ma-notification.mp3');
             audio.volume = 0.5;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
@@ -826,15 +826,47 @@
         loadMessages(rideId, 'client');
     }
 
-    async function loadMessages(rideId, role) {
-        console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
-        
-        // Nettoyer l'écouteur précédent pour le rôle driver
-        if (role === 'driver' && driverMessagesUnsubscribe) {
-            driverMessagesUnsubscribe();
-            driverMessagesUnsubscribe = null;
-            console.log('[DEBUG] Ancien écouteur de messages nettoyé');
+async function loadMessages(rideId, role) {
+    console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
+    
+    // Nettoyer l'écouteur précédent pour le rôle driver
+    if (role === 'driver' && driverMessagesUnsubscribe) {
+        driverMessagesUnsubscribe();
+        driverMessagesUnsubscribe = null;
+        console.log('[DEBUG] Ancien écouteur de messages nettoyé');
+    }
+
+    const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
+    const unsubscribe = q.onSnapshot((snapshot) => {
+        const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
+        if (!container) {
+            console.warn(`[DEBUG] Conteneur non trouvé pour role: ${role}`);
+            return;
         }
+        
+        const previousCount = container.children.length;
+        console.log(`[DEBUG] ${snapshot.size} messages reçus pour ${role}`);
+        
+        container.innerHTML = '';
+        snapshot.forEach(docSnap => {
+            const msg = docSnap.data();
+            addMessageToChat(msg.text, msg.sender === role ? 'sent' : 'received', new Date(msg.timestamp).toLocaleTimeString(), container);
+        });
+        
+        // Jouer un son pour les nouveaux messages reçus
+        if (snapshot.size > previousCount) {
+            const lastMessage = snapshot.docs[snapshot.size - 1].data();
+            if (lastMessage.sender !== role) {
+                playMessageSound();
+            }
+        }
+    });
+    
+    if (role === 'driver') {
+        driverMessagesUnsubscribe = unsubscribe;
+        console.log('[DEBUG] Nouvel écouteur de messages enregistré');
+    }
+}
 
         const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
         const unsubscribe = q.onSnapshot((snapshot) => {
