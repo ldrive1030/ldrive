@@ -806,7 +806,7 @@
     function displayClientTracking(ride, rideId) {
         statusText.innerText = ride.status === 'accepted' ? 'Conductrice en route' : 'Course en cours';
         driverNameSpan.innerText = ride.driverName || 'En attente';
-        vehicleInfoSpan.innerText = ride.vehicle || '---';
+        // vehicleInfoSpan.innerText = ride.vehicle || '---';
         etaSpan.innerText = ride.eta + ' min';
 
         if (trackingMap) trackingMap.remove();
