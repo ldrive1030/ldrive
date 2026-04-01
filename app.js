@@ -747,38 +747,55 @@
     }
 
     // ==================== MODALE DE PAIEMENT ====================
-    function showPaymentModal(rideId, amount) {
-        if (!paymentModal) return;
-        paymentAmountSpan.innerText = amount;
-        paymentErrorDiv.innerText = '';
-        paymentModal.style.display = 'flex';
 
-        const handlePayment = async (method) => {
-            showLoading();
-            try {
-                console.log(`Paiement via ${method} de ${amount}€`);
+function showPaymentModal(rideId, amount) {
+    if (!paymentModal) return;
+    paymentAmountSpan.innerText = amount;
+    paymentErrorDiv.innerText = '';
+    paymentModal.style.display = 'flex';
+
+    const handlePayment = async (method) => {
+        showLoading();
+        try {
+            console.log(`Paiement via ${method} de ${amount}€`);
+            
+            if (method === 'cash') {
+                showToast(`💶 Paiement en espèces : préparez ${amount}€ à remettre à la conductrice.`, 5000);
+                if (activeRideId) {
+                    const message = `💰 Paiement en espèces : ${amount}€ à remettre à la conductrice.`;
+                    await sendMessage(activeRideId, message, 'client');
+                }
+                await db.collection('rides').doc(rideId).update({
+                    paymentStatus: 'paid',
+                    paymentMethod: 'cash',
+                    cashAmount: parseFloat(amount)
+                });
+            } else {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 await db.collection('rides').doc(rideId).update({
                     paymentStatus: 'paid',
                     paymentMethod: method
                 });
-                paymentModal.style.display = 'none';
-                showWaitingView(rideId);
-            } catch (error) {
-                paymentErrorDiv.innerText = 'Erreur de paiement : ' + error.message;
-            } finally {
-                hideLoading();
             }
-        };
+            
+            paymentModal.style.display = 'none';
+            showWaitingView(rideId);
+        } catch (error) {
+            paymentErrorDiv.innerText = 'Erreur de paiement : ' + error.message;
+        } finally {
+            hideLoading();
+        }
+    };
 
-        payStripeBtn.onclick = () => handlePayment('stripe');
-        payPaypalBtn.onclick = () => handlePayment('paypal');
-        payGooglepayBtn.onclick = () => handlePayment('google_pay');
-        payApplepayBtn.onclick = () => handlePayment('apple_pay');
+    payStripeBtn.onclick = () => handlePayment('stripe');
+    payPaypalBtn.onclick = () => handlePayment('paypal');
+    payGooglepayBtn.onclick = () => handlePayment('google_pay');
+    payApplepayBtn.onclick = () => handlePayment('apple_pay');
+    payCashBtn.onclick = () => handlePayment('cash');
 
-        const closeSpan = paymentModal.querySelector('.close');
-        closeSpan.onclick = () => paymentModal.style.display = 'none';
-    }
+    const closeSpan = paymentModal.querySelector('.close');
+    closeSpan.onclick = () => paymentModal.style.display = 'none';
+}
 
     // ==================== CLIENT ====================
     async function listenForActiveRide() {
