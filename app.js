@@ -12,6 +12,30 @@
 
     let driverPosition = null;
     let driverWatchId = null;
+	
+	// Éléments DOM
+let clientTabs, driverTabs,
+    ridesTab, trackingTab, activityTab, accountTab,
+    driverRequestsTab, driverActiveTab, driverHistoryTab, driverAccountTab,
+    pickupInput, dropoffInput, useLocationBtn, confirmBtn, rideCardDiv,
+    nowBtn, laterBtn, datetimePicker, scheduleDatetime,
+    modal, modalDetails, closeModal, modalCloseBtn,
+    statusText, driverNameSpan, vehicleInfoSpan, etaSpan,
+    completeBtn, cancelRideBtn,
+    chatMessagesDiv, chatInput, chatSendBtn,
+    pendingRidesListDiv,
+    driverClientNameSpan, driverRouteSpan, driverStatusText,
+    driverChatMessagesDiv, driverChatInput, driverChatSendBtn,
+    driverGoToPickupBtn, driverStartBtn, driverCompleteBtn, driverCancelBtn,
+    driverHistoryListDiv,
+    roleDisplayDiv,
+    bookingDiv, waitingDiv,
+    paymentModal, paymentAmountSpan, payStripeBtn, payPaypalBtn, payGooglepayBtn, payApplepayBtn, payCashBtn, paymentErrorDiv,
+    authPanel,
+    installBtn,
+    logoutBtn;
+	
+	
 
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -787,14 +811,14 @@ function showPaymentModal(rideId, amount) {
         }
     };
 
-    payStripeBtn.onclick = () => handlePayment('stripe');
-    payPaypalBtn.onclick = () => handlePayment('paypal');
-    payGooglepayBtn.onclick = () => handlePayment('google_pay');
-    payApplepayBtn.onclick = () => handlePayment('apple_pay');
-    payCashBtn.onclick = () => handlePayment('cash');
+    if (payStripeBtn) payStripeBtn.onclick = () => handlePayment('stripe');
+    if (payPaypalBtn) payPaypalBtn.onclick = () => handlePayment('paypal');
+    if (payGooglepayBtn) payGooglepayBtn.onclick = () => handlePayment('google_pay');
+    if (payApplepayBtn) payApplepayBtn.onclick = () => handlePayment('apple_pay');
+    if (payCashBtn) payCashBtn.onclick = () => handlePayment('cash');
 
     const closeSpan = paymentModal.querySelector('.close');
-    closeSpan.onclick = () => paymentModal.style.display = 'none';
+    if (closeSpan) closeSpan.onclick = () => paymentModal.style.display = 'none';
 }
 
     // ==================== CLIENT ====================
@@ -1280,6 +1304,7 @@ function playMessageSound() {
         authPanel = document.getElementById('auth-panel');
         installBtn = document.getElementById('install-app-btn');
         logoutBtn = document.getElementById('logout-btn-header');
+		payCashBtn = document.getElementById('pay-cash-btn');
 
         // ==================== GESTION DU BOUTON D'INSTALLATION ====================
         if (installBtn) {
