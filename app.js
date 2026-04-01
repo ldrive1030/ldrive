@@ -144,7 +144,7 @@
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
         try {
-            const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+            const audio = new Audio('sounds/notification.mp3');
             audio.volume = 0.5;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
