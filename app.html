@@ -1,0 +1,229 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f9f0f5">
+    <meta name="description" content="Ldrive - Transport entre femmes, en toute sécurité">
+    <link rel="manifest" href="manifest.json">
+	<link rel="icon" type="image/png" href="img/favicon.png">
+    <title>Ldrive - Entre femmes</title>
+    <!-- Leaflet CSS/JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- Stripe.js (pour les paiements) -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Firebase SDK (version compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyBiqHVc74_e0KWVXYzbtLwpmJV5SGTz9HE",
+  authDomain: "ldrive-3b2b8.firebaseapp.com",
+  projectId: "ldrive-3b2b8",
+  storageBucket: "ldrive-3b2b8.firebasestorage.app",
+  messagingSenderId: "606298395546",
+  appId: "1:606298395546:web:42f7c2066bd47a12eea023"
+        };
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized");
+    </script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-top">
+                <div class="logo">
+                    <a href="index.html" style="text-decoration: none;">
+                        <span class="logo-icon"><img src="img/logo-icon.png" alt="Logo" class="logo-icon"></span>
+                        <span class="logo-text">Ldrive</span>
+                    </a>
+                </div>
+                <div class="role-display" id="role-display"></div>
+                <div class="install-button-container">
+                    <button id="install-app-btn" class="install-btn" style="display: none;">
+                        <span class="install-icon">📲</span> Installer
+                    </button>
+                </div>
+                <div class="logout-button-container">
+                    <button id="logout-btn-header" class="logout-btn" style="display: none;">
+                        <span class="logout-icon">🚪</span> Déconnexion
+                    </button>
+                </div>
+            </div>
+            <div class="tabs" id="client-tabs" style="display: none;">
+                <button class="tab-btn active" data-tab="rides">Courses</button>
+                <button class="tab-btn" data-tab="activity">Activité</button>
+                <button class="tab-btn" data-tab="account">Compte</button>
+            </div>
+            <div class="tabs" id="driver-tabs" style="display: none;">
+                <button class="tab-btn active" data-tab="driver-requests">Courses disponibles</button>
+                <button class="tab-btn" data-tab="driver-active">Course en cours</button>
+                <button class="tab-btn" data-tab="driver-history">Historique</button>
+                <button class="tab-btn" data-tab="driver-account">Compte</button>
+            </div>
+        </header>
+
+        <main class="tab-content">
+            <div id="auth-panel"></div>
+
+            <!-- Interface cliente -->
+            <div id="rides-tab" class="tab-pane active">
+                <div id="ride-booking">
+                    <div class="ride-header">
+                        <div class="time-toggle">
+                            <button id="now-btn" class="time-option active">Maintenant</button>
+                            <button id="later-btn" class="time-option">Plus tard</button>
+                        </div>
+                        <div class="datetime-picker" id="datetime-picker" style="display: none;">
+                            <input type="datetime-local" id="schedule-datetime">
+                        </div>
+                    </div>
+                    <div class="location-inputs">
+                        <div class="input-group">
+                            <div class="icon">📍</div>
+                            <input type="text" id="pickup-input" placeholder="Où êtes-vous ?" autocomplete="off">
+                            <button id="use-current-location" class="location-btn">📍 Me localiser</button>
+                        </div>
+                        <div class="input-group">
+                            <div class="icon">🏁</div>
+                            <input type="text" id="dropoff-input" placeholder="Où allez-vous ?" autocomplete="off">
+                        </div>
+                    </div>
+                    <div id="map"></div>
+                    <div class="ride-options">
+                        <h3>Choisissez votre course</h3>
+                        <div id="ride-card" class="ride-card"></div>
+                        <button id="confirm-ride-btn" class="confirm-btn" disabled>Confirmer la course</button>
+                    </div>
+                </div>
+                <div id="waiting-view" style="display: none;">
+                    <div class="waiting-container">
+                        <div class="spinner"></div>
+                        <h3>En attente d'acceptation par une conductrice...</h3>
+                        <p>Votre course a été demandée. Vous serez notifiée dès qu'une conductrice l'accepte.</p>
+                        <button id="cancel-waiting-btn" class="confirm-btn" style="background:#e6c3c3; color:#5e3a3a;">Annuler la demande</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tracking-tab" class="tab-pane">
+                <div id="tracking-view">
+                    <h2>Votre course Ldrive</h2>
+                    <div id="tracking-map" style="height: 250px; margin-bottom: 16px;"></div>
+                    <div id="tracking-status">
+                        <p><strong>Statut :</strong> <span id="status-text">Recherche d'une conductrice...</span></p>
+                        <p><strong>Conductrice :</strong> <span id="driver-name">---</span></p>
+                        <p><strong>Véhicule :</strong> <span id="vehicle-info">---</span></p>
+                        <p><strong>Temps d'attente estimé :</strong> <span id="eta">---</span></p>
+                    </div>
+                    <div id="chat-section">
+                        <div class="chat-header">
+                            <div class="chat-header-icon">💬</div>
+                            <h3>Messagerie avec la conductrice</h3>
+                        </div>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Votre message..." autocomplete="off">
+                            <button id="chat-send-btn">Envoyer</button>
+                        </div>
+                    </div>
+                    <button id="complete-ride-btn" class="confirm-btn" style="background: #b5838a;">Terminer la course</button>
+                    <button id="cancel-ride-btn" class="confirm-btn" style="background: #e6c3c3; color:#5e3a3a; margin-top: 8px;">Annuler</button>
+                </div>
+            </div>
+
+            <div id="activity-tab" class="tab-pane">
+                <h2>Vos activités récentes</h2>
+                <div id="rides-history" class="history-list"></div>
+            </div>
+
+            <div id="account-tab" class="tab-pane">
+                <div id="auth-section"></div>
+            </div>
+
+            <!-- Interface conductrice -->
+            <div id="driver-requests-tab" class="tab-pane">
+                <h2>Courses demandées</h2>
+                <div id="pending-rides-list" class="pending-rides-list"></div>
+            </div>
+
+            <div id="driver-active-tab" class="tab-pane">
+                <div id="driver-active-view">
+                    <h2>Course en cours</h2>
+                    <div id="driver-tracking-map" style="height: 250px; margin-bottom: 16px;"></div>
+                    <div id="driver-tracking-status">
+                        <p><strong>Passagère :</strong> <span id="driver-client-name">---</span></p>
+                        <p><strong>Trajet :</strong> <span id="driver-route">---</span></p>
+                        <p><strong>Statut :</strong> <span id="driver-status-text">---</span></p>
+                    </div>
+                    <div id="driver-chat-section">
+                        <div class="chat-header">
+                            <div class="chat-header-icon">💬</div>
+                            <h3>Messagerie avec la Passagère</h3>
+                        </div>
+                        <div id="driver-chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="driver-chat-input" placeholder="Votre message..." autocomplete="off">
+                            <button id="driver-chat-send-btn">Envoyer</button>
+                        </div>
+                    </div>
+                    <button id="driver-go-to-pickup-btn" class="confirm-btn" style="background: #b5838a;">📍 Aller à la Passagère</button>
+                    <button id="driver-start-ride-btn" class="confirm-btn" style="background: #b5838a;">🚗 Démarrer la course</button>
+                    <button id="driver-complete-ride-btn" class="confirm-btn" style="background: #28a745;">Terminer la course</button>
+                    <button id="driver-cancel-ride-btn" class="confirm-btn" style="background: #e6c3c3; color:#5e3a3a; margin-top: 8px;">Annuler</button>
+                </div>
+            </div>
+
+            <div id="driver-history-tab" class="tab-pane">
+                <h2>Vos courses terminées</h2>
+                <div id="driver-history-list" class="history-list"></div>
+            </div>
+
+            <div id="driver-account-tab" class="tab-pane">
+                <div id="driver-auth-section"></div>
+            </div>
+        </main>
+
+        <div id="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+
+        <div id="toast-container"></div>
+
+        <div id="confirmation-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Course confirmée !</h3>
+                <p id="modal-details"></p>
+                <button id="modal-close-btn">OK</button>
+            </div>
+        </div>
+
+        <div id="payment-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Paiement de la course</h3>
+                <p>Montant : <span id="payment-amount"></span> €</p>
+                <div id="payment-methods">
+                    <button id="pay-stripe-btn" class="confirm-btn">Payer par carte (Stripe)</button>
+                    <button id="pay-paypal-btn" class="confirm-btn" style="background:#0070ba;">PayPal</button>
+                    <button id="pay-googlepay-btn" class="confirm-btn" style="background:#4285f4;">Google Pay</button>
+                    <button id="pay-applepay-btn" class="confirm-btn" style="background:#000000;">Apple Pay</button>
+                </div>
+                <div id="payment-error" style="color:red; margin-top:10px;"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
