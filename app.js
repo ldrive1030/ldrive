@@ -26,6 +26,9 @@
         icon: '🚗'
     };
 
+    // ==================== GOOGLE SHEETS WEB APP ====================
+    const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec'; // REMPLACEZ PAR VOTRE URL
+
     // Icônes Leaflet personnalisées
     const redIcon = L.icon({
         iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -106,11 +109,42 @@
             }, 300);
         }, duration);
     }
+	
+	function playMessageSound() {
+    try {
+        const audio = new Audio('https://www.soundjay.com/misc/sounds/notification-01.mp3');
+        audio.volume = 0.4;
+        audio.play().catch(e => console.log('Audio playback failed:', e));
+    } catch (e) {
+        console.log('Audio not supported');
+    }
+}
+
+    // ==================== GOOGLE SHEETS SYNC ====================
+    async function sendToGoogleSheets(rideData) {
+        if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec') {
+            console.log('Google Sheets URL non configurée');
+            return;
+        }
+        try {
+            const response = await fetch(GOOGLE_SHEETS_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(rideData)
+            });
+            const result = await response.json();
+            console.log('Données envoyées à Google Sheets:', result);
+        } catch (error) {
+            console.error('Erreur lors de l’envoi à Google Sheets:', error);
+        }
+    }
 
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
         try {
-            const audio = new Audio('sounds/ma-notification.mp3');
+            const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
             audio.volume = 0.5;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
@@ -816,9 +850,7 @@
         loadMessages(rideId, 'client');
     }
 
- 
- async function loadMessages(rideId, role) {
-    console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
+async function loadMessages(rideId, role) {
     if (role === 'driver' && driverMessagesUnsubscribe) {
         driverMessagesUnsubscribe();
         driverMessagesUnsubscribe = null;
@@ -827,22 +859,29 @@
     const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
     const unsubscribe = q.onSnapshot((snapshot) => {
         const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
-        if (!container) {
-            console.warn(`[DEBUG] Conteneur non trouvé pour role: ${role}`);
-            return;
-        }
-        console.log(`[DEBUG] ${snapshot.size} messages reçus pour ${role}`);
+        if (!container) return;
+        
+        const previousCount = container.children.length;
+        
         container.innerHTML = '';
         snapshot.forEach(docSnap => {
             const msg = docSnap.data();
             addMessageToChat(msg.text, msg.sender === role ? 'sent' : 'received', new Date(msg.timestamp).toLocaleTimeString(), container);
         });
+        
+        // Jouer un son pour les nouveaux messages reçus
+        if (snapshot.size > previousCount) {
+            const lastMessage = snapshot.docs[snapshot.size - 1].data();
+            if (lastMessage.sender !== role) {
+                playMessageSound();
+            }
+        }
     });
     if (role === 'driver') {
         driverMessagesUnsubscribe = unsubscribe;
     }
 }
- 
+
     async function sendMessage(rideId, text, senderRole) {
         if (!text.trim()) return;
         const message = {
@@ -1030,6 +1069,17 @@
                 driverName: currentUser.displayName || currentUser.email,
                 vehicle: 'Renault Zoé'
             });
+            
+            // Envoyer la mise à jour à Google Sheets
+            const rideDoc = await db.collection('rides').doc(rideId).get();
+            const ride = rideDoc.data();
+            sendToGoogleSheets({
+                id: rideId,
+                driverName: currentUser.displayName || currentUser.email,
+                status: 'accepted',
+                updatedAt: new Date().toISOString()
+            });
+            
             showToast('Course acceptée ! Vous pouvez suivre le trajet.');
         } catch (error) {
             showToast('Erreur lors de l’acceptation : ' + error.message);
@@ -1058,32 +1108,31 @@
         });
     }
 
-   function displayDriverActiveRide(ride, rideId) {
-    driverClientNameSpan.innerText = ride.clientName;
-    driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
-    driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la Passagère' : 'Course en cours';
+    function displayDriverActiveRide(ride, rideId) {
+        driverClientNameSpan.innerText = ride.clientName;
+        driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
+        driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la Passagère' : 'Course en cours';
 
-    if (driverTrackingMap) driverTrackingMap.remove();
-    const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
-    driverTrackingMap = L.map('driver-tracking-map').setView(center, 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(driverTrackingMap);
-    L.marker([ride.pickupCoords.lat, ride.pickupCoords.lng], { icon: orangeIcon }).addTo(driverTrackingMap).bindPopup('Prise en charge');
-    L.marker([ride.dropoffCoords.lat, ride.dropoffCoords.lng], { icon: blueIcon }).addTo(driverTrackingMap).bindPopup('Destination');
-    L.polyline([[ride.pickupCoords.lat, ride.pickupCoords.lng], [ride.dropoffCoords.lat, ride.dropoffCoords.lng]], { color: '#b5838a', weight: 3 }).addTo(driverTrackingMap);
-    if (driverPosition) {
-        const driverMarker = L.marker([driverPosition.lat, driverPosition.lng], { icon: L.divIcon({ html: '🚗', className: 'driver-marker', iconSize: [30, 30] }) }).addTo(driverTrackingMap);
-        driverTrackingMap.driverMarker = driverMarker;
-    } else {
-        driverTrackingMap.driverMarker = null;
+        if (driverTrackingMap) driverTrackingMap.remove();
+        const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
+        driverTrackingMap = L.map('driver-tracking-map').setView(center, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(driverTrackingMap);
+        L.marker([ride.pickupCoords.lat, ride.pickupCoords.lng], { icon: orangeIcon }).addTo(driverTrackingMap).bindPopup('Prise en charge');
+        L.marker([ride.dropoffCoords.lat, ride.dropoffCoords.lng], { icon: blueIcon }).addTo(driverTrackingMap).bindPopup('Destination');
+        L.polyline([[ride.pickupCoords.lat, ride.pickupCoords.lng], [ride.dropoffCoords.lat, ride.dropoffCoords.lng]], { color: '#b5838a', weight: 3 }).addTo(driverTrackingMap);
+        if (driverPosition) {
+            const driverMarker = L.marker([driverPosition.lat, driverPosition.lng], { icon: L.divIcon({ html: '🚗', className: 'driver-marker', iconSize: [30, 30] }) }).addTo(driverTrackingMap);
+            driverTrackingMap.driverMarker = driverMarker;
+        } else {
+            driverTrackingMap.driverMarker = null;
+        }
+
+        setTimeout(() => {
+            loadMessages(rideId, 'driver');
+        }, 100);
     }
-
-    // Forcer le chargement des messages avec un délai plus long
-    setTimeout(() => {
-        loadMessages(rideId, 'driver');
-    }, 300);
-}
 
     async function loadDriverHistory() {
         if (!currentUser) return;
@@ -1370,6 +1419,19 @@
                 showLoading();
                 try {
                     const docRef = await db.collection('rides').add(rideData);
+                    
+                    // Envoyer à Google Sheets
+                    sendToGoogleSheets({
+                        id: docRef.id,
+                        clientName: currentUser.displayName || currentUser.email,
+                        pickup: pickupInput.value,
+                        dropoff: dropoffInput.value,
+                        price: parseFloat(price),
+                        status: 'pending',
+                        createdAt: new Date().toISOString(),
+                        paymentMethod: null
+                    });
+                    
                     showPaymentModal(docRef.id, parseFloat(price));
                 } catch (error) {
                     showToast('Erreur lors de la création de la course : ' + error.message);
@@ -1438,6 +1500,14 @@
                     showLoading();
                     try {
                         await db.collection('rides').doc(activeRideId).update({ status: 'completed' });
+                        
+                        // Envoyer la mise à jour à Google Sheets
+                        sendToGoogleSheets({
+                            id: activeRideId,
+                            status: 'completed',
+                            updatedAt: new Date().toISOString()
+                        });
+                        
                         activeRideId = null;
                         currentDriverRide = null;
                         showDriverTab('driver-requests');
@@ -1465,6 +1535,14 @@
                         showLoading();
                         try {
                             await db.collection('rides').doc(activeRideId).update({ status: 'cancelled' });
+                            
+                            // Envoyer la mise à jour à Google Sheets
+                            sendToGoogleSheets({
+                                id: activeRideId,
+                                status: 'cancelled',
+                                updatedAt: new Date().toISOString()
+                            });
+                            
                             activeRideId = null;
                             currentDriverRide = null;
                             showDriverTab('driver-requests');
@@ -1502,6 +1580,14 @@
                     showLoading();
                     try {
                         await db.collection('rides').doc(activeRideId).update({ status: 'completed' });
+                        
+                        // Envoyer la mise à jour à Google Sheets
+                        sendToGoogleSheets({
+                            id: activeRideId,
+                            status: 'completed',
+                            updatedAt: new Date().toISOString()
+                        });
+                        
                         activeRideId = null;
                         resetClientBooking();
                         if (bookingDiv) bookingDiv.style.display = 'block';
@@ -1525,6 +1611,14 @@
                         showLoading();
                         try {
                             await db.collection('rides').doc(activeRideId).update({ status: 'cancelled' });
+                            
+                            // Envoyer la mise à jour à Google Sheets
+                            sendToGoogleSheets({
+                                id: activeRideId,
+                                status: 'cancelled',
+                                updatedAt: new Date().toISOString()
+                            });
+                            
                             activeRideId = null;
                             resetClientBooking();
                             if (bookingDiv) bookingDiv.style.display = 'block';
@@ -1586,36 +1680,37 @@
         }
 
         // Onglets conductrice
-if (driverTabs) {
-    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (currentRole !== 'driver') return;
-            const tabId = btn.dataset.tab;
-            showDriverTab(tabId);
-            if (tabId === 'driver-history') {
-                if (currentUser) loadDriverHistory();
-                else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
-            }
-            if (tabId === 'driver-account') {
-                if (currentUser) showDriverProfile();
-            }
-            if (tabId === 'driver-active') {
-                if (activeRideId && currentUser) {
-                    if (currentDriverRide) {
-                        loadMessages(activeRideId, 'driver');
-                    } else {
-                        db.collection('rides').doc(activeRideId).get().then(doc => {
-                            if (doc.exists) {
-                                currentDriverRide = doc.data();
-                                loadMessages(activeRideId, 'driver');
-                            }
-                        });
+        if (driverTabs) {
+            document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentRole !== 'driver') return;
+                    const tabId = btn.dataset.tab;
+                    showDriverTab(tabId);
+                    if (tabId === 'driver-history') {
+                        if (currentUser) loadDriverHistory();
+                        else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
                     }
-                }
-            }
-        });
-    });
-}
+                    if (tabId === 'driver-account') {
+                        if (currentUser) showDriverProfile();
+                    }
+                    if (tabId === 'driver-active') {
+                        if (activeRideId && currentUser) {
+                            if (currentDriverRide) {
+                                loadMessages(activeRideId, 'driver');
+                            } else {
+                                db.collection('rides').doc(activeRideId).get().then(doc => {
+                                    if (doc.exists) {
+                                        currentDriverRide = doc.data();
+                                        loadMessages(activeRideId, 'driver');
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
         // Carte client
         setTimeout(() => {
             if (!map && document.getElementById('map')) {
