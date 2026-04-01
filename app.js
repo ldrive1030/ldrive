@@ -112,8 +112,8 @@
 	
 	function playMessageSound() {
     try {
-        const audio = new Audio('sounds/notification.mp3');
-        audio.volume = 0.8;
+        const audio = new Audio('https://www.soundjay.com/misc/sounds/notification-01.mp3');
+        audio.volume = 0.4;
         audio.play().catch(e => console.log('Audio playback failed:', e));
     } catch (e) {
         console.log('Audio not supported');
@@ -710,18 +710,19 @@
         if (tabId === 'tracking' && trackingMap) setTimeout(() => trackingMap.invalidateSize(), 100);
     }
 
-    function showDriverTab(tabId) {
-        if (!driverTabs) return;
-        document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.querySelector(`#driver-tabs .tab-btn[data-tab="${tabId}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
-        document.querySelectorAll('#driver-requests-tab, #driver-active-tab, #driver-history-tab, #driver-account-tab').forEach(pane => pane.classList.remove('active'));
-        if (tabId === 'driver-requests') driverRequestsTab.classList.add('active');
-        else if (tabId === 'driver-active') driverActiveTab.classList.add('active');
-        else if (tabId === 'driver-history') driverHistoryTab.classList.add('active');
-        else if (tabId === 'driver-account') driverAccountTab.classList.add('active');
-        if (tabId === 'driver-active' && driverTrackingMap) setTimeout(() => driverTrackingMap.invalidateSize(), 100);
-    }
+function showDriverTab(tabId) {
+    console.log(`[DEBUG] showDriverTab appelé avec: ${tabId}`);
+    if (!driverTabs) return;
+    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`#driver-tabs .tab-btn[data-tab="${tabId}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+    document.querySelectorAll('#driver-requests-tab, #driver-active-tab, #driver-history-tab, #driver-account-tab').forEach(pane => pane.classList.remove('active'));
+    if (tabId === 'driver-requests') driverRequestsTab.classList.add('active');
+    else if (tabId === 'driver-active') driverActiveTab.classList.add('active');
+    else if (tabId === 'driver-history') driverHistoryTab.classList.add('active');
+    else if (tabId === 'driver-account') driverAccountTab.classList.add('active');
+    if (tabId === 'driver-active' && driverTrackingMap) setTimeout(() => driverTrackingMap.invalidateSize(), 100);
+}
 
     // ==================== ÉCRAN D'ATTENTE ====================
     function showWaitingView(rideId) {
@@ -851,17 +852,25 @@
     }
 
 async function loadMessages(rideId, role) {
+    console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
+    
+    // Nettoyer l'écouteur précédent pour le rôle driver
     if (role === 'driver' && driverMessagesUnsubscribe) {
         driverMessagesUnsubscribe();
         driverMessagesUnsubscribe = null;
+        console.log('[DEBUG] Ancien écouteur de messages nettoyé');
     }
 
     const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
     const unsubscribe = q.onSnapshot((snapshot) => {
         const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
-        if (!container) return;
+        if (!container) {
+            console.warn(`[DEBUG] Conteneur non trouvé pour role: ${role}`);
+            return;
+        }
         
         const previousCount = container.children.length;
+        console.log(`[DEBUG] ${snapshot.size} messages reçus pour ${role}`);
         
         container.innerHTML = '';
         snapshot.forEach(docSnap => {
@@ -877,8 +886,10 @@ async function loadMessages(rideId, role) {
             }
         }
     });
+    
     if (role === 'driver') {
         driverMessagesUnsubscribe = unsubscribe;
+        console.log('[DEBUG] Nouvel écouteur de messages enregistré');
     }
 }
 
@@ -1108,31 +1119,32 @@ async function loadMessages(rideId, role) {
         });
     }
 
-    function displayDriverActiveRide(ride, rideId) {
-        driverClientNameSpan.innerText = ride.clientName;
-        driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
-        driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la Passagère' : 'Course en cours';
+function displayDriverActiveRide(ride, rideId) {
+    driverClientNameSpan.innerText = ride.clientName;
+    driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
+    driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la cliente' : 'Course en cours';
 
-        if (driverTrackingMap) driverTrackingMap.remove();
-        const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
-        driverTrackingMap = L.map('driver-tracking-map').setView(center, 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(driverTrackingMap);
-        L.marker([ride.pickupCoords.lat, ride.pickupCoords.lng], { icon: orangeIcon }).addTo(driverTrackingMap).bindPopup('Prise en charge');
-        L.marker([ride.dropoffCoords.lat, ride.dropoffCoords.lng], { icon: blueIcon }).addTo(driverTrackingMap).bindPopup('Destination');
-        L.polyline([[ride.pickupCoords.lat, ride.pickupCoords.lng], [ride.dropoffCoords.lat, ride.dropoffCoords.lng]], { color: '#b5838a', weight: 3 }).addTo(driverTrackingMap);
-        if (driverPosition) {
-            const driverMarker = L.marker([driverPosition.lat, driverPosition.lng], { icon: L.divIcon({ html: '🚗', className: 'driver-marker', iconSize: [30, 30] }) }).addTo(driverTrackingMap);
-            driverTrackingMap.driverMarker = driverMarker;
-        } else {
-            driverTrackingMap.driverMarker = null;
-        }
-
-        setTimeout(() => {
-            loadMessages(rideId, 'driver');
-        }, 100);
+    if (driverTrackingMap) driverTrackingMap.remove();
+    const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
+    driverTrackingMap = L.map('driver-tracking-map').setView(center, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(driverTrackingMap);
+    L.marker([ride.pickupCoords.lat, ride.pickupCoords.lng], { icon: orangeIcon }).addTo(driverTrackingMap).bindPopup('Prise en charge');
+    L.marker([ride.dropoffCoords.lat, ride.dropoffCoords.lng], { icon: blueIcon }).addTo(driverTrackingMap).bindPopup('Destination');
+    L.polyline([[ride.pickupCoords.lat, ride.pickupCoords.lng], [ride.dropoffCoords.lat, ride.dropoffCoords.lng]], { color: '#b5838a', weight: 3 }).addTo(driverTrackingMap);
+    if (driverPosition) {
+        const driverMarker = L.marker([driverPosition.lat, driverPosition.lng], { icon: L.divIcon({ html: '🚗', className: 'driver-marker', iconSize: [30, 30] }) }).addTo(driverTrackingMap);
+        driverTrackingMap.driverMarker = driverMarker;
+    } else {
+        driverTrackingMap.driverMarker = null;
     }
+
+    // Forcer le chargement des messages avec un délai suffisant
+    setTimeout(() => {
+        loadMessages(rideId, 'driver');
+    }, 500);
+}
 
     async function loadDriverHistory() {
         if (!currentUser) return;
@@ -1680,42 +1692,38 @@ async function loadMessages(rideId, role) {
         }
 
         // Onglets conductrice
-        if (driverTabs) {
-            document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (currentRole !== 'driver') return;
-                    const tabId = btn.dataset.tab;
-                    showDriverTab(tabId);
-                    if (tabId === 'driver-history') {
-                        if (currentUser) loadDriverHistory();
-                        else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
-                    }
-                    if (tabId === 'driver-account') {
-                        if (currentUser) showDriverProfile();
-                    }
-                    if (tabId === 'driver-active') {
-                        if (activeRideId && currentUser) {
-                            if (currentDriverRide) {
-                                loadMessages(activeRideId, 'driver');
-                            } else {
-                                db.collection('rides').doc(activeRideId).get().then(doc => {
-                                    if (doc.exists) {
-                                        currentDriverRide = doc.data();
-                                        loadMessages(activeRideId, 'driver');
-                                    }
-                                });
-                            }
-                        }
-                    }
-                });
-            });
-        }
-
-        // Carte client
-        setTimeout(() => {
-            if (!map && document.getElementById('map')) {
-                initMap();
+if (driverTabs) {
+    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (currentRole !== 'driver') return;
+            const tabId = btn.dataset.tab;
+            console.log(`[DEBUG] Clic sur onglet conductrice: ${tabId}`);
+            showDriverTab(tabId);
+            
+            if (tabId === 'driver-history') {
+                if (currentUser) loadDriverHistory();
+                else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
             }
-        }, 500);
+            if (tabId === 'driver-account') {
+                if (currentUser) showDriverProfile();
+            }
+            if (tabId === 'driver-active') {
+                if (activeRideId && currentUser) {
+                    // Forcer le rechargement des messages
+                    if (currentDriverRide) {
+                        loadMessages(activeRideId, 'driver');
+                    } else {
+                        db.collection('rides').doc(activeRideId).get().then(doc => {
+                            if (doc.exists) {
+                                currentDriverRide = doc.data();
+                                loadMessages(activeRideId, 'driver');
+                            }
+                        });
+                    }
+                } else {
+                    console.log('[DEBUG] Aucune course active pour charger les messages');
+                }
+            }
+        });
     });
-})();
+}
