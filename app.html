@@ -206,20 +206,20 @@
             </div>
         </div>
 
-        <div id="payment-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h3>Paiement de la course</h3>
-                <p>Montant : <span id="payment-amount"></span> €</p>
-                <div id="payment-methods">
-                    <button id="pay-stripe-btn" class="confirm-btn">Payer par carte (Stripe)</button>
-                    <button id="pay-paypal-btn" class="confirm-btn" style="background:#0070ba;">PayPal</button>
-                    <button id="pay-googlepay-btn" class="confirm-btn" style="background:#4285f4;">Google Pay</button>
-                    <button id="pay-applepay-btn" class="confirm-btn" style="background:#000000;">Apple Pay</button>
-                </div>
-                <div id="payment-error" style="color:red; margin-top:10px;"></div>
-            </div>
+<div id="payment-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Paiement de la course</h3>
+        <p>Montant : <span id="payment-amount"></span> €</p>
+        <div id="payment-methods">
+            <button id="pay-stripe-btn" class="confirm-btn">Payer par carte (Stripe)</button>
+            <button id="pay-paypal-btn" class="confirm-btn" style="background:#0070ba;">PayPal</button>
+            <button id="pay-googlepay-btn" class="confirm-btn" style="background:#4285f4;">Google Pay</button>
+            <button id="pay-applepay-btn" class="confirm-btn" style="background:#000000;">Apple Pay</button>
+            <button id="pay-cash-btn" class="confirm-btn" style="background:#28a745;">💶 Payer en espèces</button>
         </div>
+        <div id="payment-error" style="color:red; margin-top:10px;"></div>
     </div>
+</div>
 </body>
 </html>
