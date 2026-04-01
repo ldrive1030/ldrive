@@ -78,27 +78,7 @@ let clientTabs, driverTabs,
         shadowSize: [41, 41]
     });
 
-    // Éléments DOM
-    let clientTabs, driverTabs,
-        ridesTab, trackingTab, activityTab, accountTab,
-        driverRequestsTab, driverActiveTab, driverHistoryTab, driverAccountTab,
-        pickupInput, dropoffInput, useLocationBtn, confirmBtn, rideCardDiv,
-        nowBtn, laterBtn, datetimePicker, scheduleDatetime,
-        modal, modalDetails, closeModal, modalCloseBtn,
-        statusText, driverNameSpan, vehicleInfoSpan, etaSpan,
-        completeBtn, cancelRideBtn,
-        chatMessagesDiv, chatInput, chatSendBtn,
-        pendingRidesListDiv,
-        driverClientNameSpan, driverRouteSpan, driverStatusText,
-        driverChatMessagesDiv, driverChatInput, driverChatSendBtn,
-        driverGoToPickupBtn, driverStartBtn, driverCompleteBtn, driverCancelBtn,
-        driverHistoryListDiv,
-        roleDisplayDiv,
-        bookingDiv, waitingDiv,
-        paymentModal, paymentAmountSpan, payStripeBtn, payPaypalBtn, payGooglepayBtn, payApplepayBtn, paymentErrorDiv,
-        authPanel,
-        installBtn,
-        logoutBtn;
+   
 
     // ==================== MAP & LOCATION ====================
     let map, pickupMarker, dropoffMarker;
