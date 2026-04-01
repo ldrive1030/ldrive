@@ -112,8 +112,8 @@
 	
 	function playMessageSound() {
     try {
-        const audio = new Audio('https://www.soundjay.com/misc/sounds/notification-01.mp3');
-        audio.volume = 0.4;
+        const audio = new Audio('sounds/notification.mp3');
+        audio.volume = 0.8;
         audio.play().catch(e => console.log('Audio playback failed:', e));
     } catch (e) {
         console.log('Audio not supported');
