@@ -111,22 +111,14 @@
     function playNotificationSound() {
         try {
             const audio = new Audio('sounds/ma-notification.mp3');
-            audio.volume = 0.5;
-            audio.play().catch(e => console.log('Audio playback failed:', e));
-        } catch (e) {
-            console.log('Audio not supported');
-        }
-    }
-
-    function playMessageSound() {
-        try {
-            const audio = new Audio('sounds/notification.mp3');
             audio.volume = 0.8;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
             console.log('Audio not supported');
         }
     }
+
+   
 
     // ==================== AUTOCOMPLÉTION POUR LES ADRESSES ====================
     async function initAddressAutocomplete(inputElement, setCoordsCallback) {
@@ -826,6 +818,7 @@
         loadMessages(rideId, 'client');
     }
 
+// ==================== MESSAGERIE ====================
 async function loadMessages(rideId, role) {
     console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
     
@@ -868,58 +861,36 @@ async function loadMessages(rideId, role) {
     }
 }
 
-        const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
-        const unsubscribe = q.onSnapshot((snapshot) => {
-            const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
-            if (!container) {
-                console.warn(`[DEBUG] Conteneur non trouvé pour role: ${role}`);
-                return;
-            }
-            
-            const previousCount = container.children.length;
-            console.log(`[DEBUG] ${snapshot.size} messages reçus pour ${role}`);
-            
-            container.innerHTML = '';
-            snapshot.forEach(docSnap => {
-                const msg = docSnap.data();
-                addMessageToChat(msg.text, msg.sender === role ? 'sent' : 'received', new Date(msg.timestamp).toLocaleTimeString(), container);
-            });
-            
-            // Jouer un son pour les nouveaux messages reçus
-            if (snapshot.size > previousCount) {
-                const lastMessage = snapshot.docs[snapshot.size - 1].data();
-                if (lastMessage.sender !== role) {
-                    playMessageSound();
-                }
-            }
-        });
-        
-        if (role === 'driver') {
-            driverMessagesUnsubscribe = unsubscribe;
-            console.log('[DEBUG] Nouvel écouteur de messages enregistré');
-        }
-    }
+async function sendMessage(rideId, text, senderRole) {
+    if (!text.trim()) return;
+    const message = {
+        text: text,
+        sender: senderRole,
+        timestamp: new Date().toISOString()
+    };
+    await db.collection('rides').doc(rideId).collection('messages').add(message);
+}
 
-    async function sendMessage(rideId, text, senderRole) {
-        if (!text.trim()) return;
-        const message = {
-            text: text,
-            sender: senderRole,
-            timestamp: new Date().toISOString()
-        };
-        await db.collection('rides').doc(rideId).collection('messages').add(message);
-    }
+function addMessageToChat(text, type, time, container) {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message', type);
+    msgDiv.innerHTML = `
+        <div class="message-bubble">${escapeHtml(text)}</div>
+        <div class="message-time">${time}</div>
+    `;
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+}
 
-    function addMessageToChat(text, type, time, container) {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('message', type);
-        msgDiv.innerHTML = `
-            <div class="message-bubble">${escapeHtml(text)}</div>
-            <div class="message-time">${time}</div>
-        `;
-        container.appendChild(msgDiv);
-        container.scrollTop = container.scrollHeight;
+function playMessageSound() {
+    try {
+        const audio = new Audio('sounds/notification.mp3');
+        audio.volume = 0.4;
+        audio.play().catch(e => console.log('Audio playback failed:', e));
+    } catch (e) {
+        console.log('Audio not supported');
     }
+}
 
     async function loadClientHistory() {
         if (!currentUser) return;
