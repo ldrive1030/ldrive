@@ -26,9 +26,6 @@
         icon: '🚗'
     };
 
-    // ==================== GOOGLE SHEETS WEB APP ====================
-    const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec'; // REMPLACEZ PAR VOTRE URL
-
     // Icônes Leaflet personnalisées
     const redIcon = L.icon({
         iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -109,43 +106,22 @@
             }, 300);
         }, duration);
     }
-	
-	function playMessageSound() {
-    try {
-        const audio = new Audio('https://www.soundjay.com/misc/sounds/notification-01.mp3');
-        audio.volume = 0.4;
-        audio.play().catch(e => console.log('Audio playback failed:', e));
-    } catch (e) {
-        console.log('Audio not supported');
-    }
-}
-
-    // ==================== GOOGLE SHEETS SYNC ====================
-    async function sendToGoogleSheets(rideData) {
-        if (!GOOGLE_SHEETS_URL || GOOGLE_SHEETS_URL === 'https://script.google.com/macros/s/AKfycbxEGKDH_UCdSTmrpoGSCyt8ihkFYyc62kLfgEdDuzxIGQzdtAl0dFYp4l5H_uQd39J_tA/exec') {
-            console.log('Google Sheets URL non configurée');
-            return;
-        }
-        try {
-            const response = await fetch(GOOGLE_SHEETS_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(rideData)
-            });
-            const result = await response.json();
-            console.log('Données envoyées à Google Sheets:', result);
-        } catch (error) {
-            console.error('Erreur lors de l’envoi à Google Sheets:', error);
-        }
-    }
 
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
         try {
-            const audio = new Audio('sounds/notification.mp3');
+            const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
             audio.volume = 0.5;
+            audio.play().catch(e => console.log('Audio playback failed:', e));
+        } catch (e) {
+            console.log('Audio not supported');
+        }
+    }
+
+    function playMessageSound() {
+        try {
+            const audio = new Audio('https://www.soundjay.com/misc/sounds/notification-01.mp3');
+            audio.volume = 0.4;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
             console.log('Audio not supported');
@@ -414,7 +390,7 @@
                 const role = userDoc.data().role;
                 if (role === 'client' || role === 'driver') {
                     currentRole = role;
-                    if (roleDisplayDiv) roleDisplayDiv.innerHTML = `<span class="role-badge">${role === 'client' ? '👩 Passagère' : '👩‍✈️ Conductrice'}</span>`;
+                    if (roleDisplayDiv) roleDisplayDiv.innerHTML = `<span class="role-badge">${role === 'client' ? '👩 Cliente' : '👩‍✈️ Conductrice'}</span>`;
                     if (authPanel) authPanel.style.display = 'none';
                     setRole(role);
                     return;
@@ -444,7 +420,7 @@
                 <h2>Bienvenue ${user.displayName || user.email}</h2>
                 <p>Choisissez votre profil :</p>
                 <div class="role-choice-buttons">
-                    <button id="choose-client-existing" class="role-choice-btn">👩 Je suis une Passagère</button>
+                    <button id="choose-client-existing" class="role-choice-btn">👩 Je suis une cliente</button>
                     <button id="choose-driver-existing" class="role-choice-btn">👩‍✈️ Je suis une conductrice</button>
                 </div>
             </div>
@@ -486,7 +462,7 @@
                 <h2>Bienvenue sur Ldrive</h2>
                 <p>Choisissez votre profil :</p>
                 <div class="role-choice-buttons">
-                    <button id="choose-client" class="role-choice-btn">👩 Je suis une Passagère</button>
+                    <button id="choose-client" class="role-choice-btn">👩 Je suis une cliente</button>
                     <button id="choose-driver" class="role-choice-btn">👩‍✈️ Je suis une conductrice</button>
                 </div>
             </div>
@@ -506,7 +482,7 @@
         if (!authPanel) return;
         authPanel.innerHTML = `
             <div class="role-choice-container">
-                <h2>${role === 'client' ? 'Passagère' : 'Conductrice'}</h2>
+                <h2>${role === 'client' ? 'Cliente' : 'Conductrice'}</h2>
                 <div class="auth-choice-buttons">
                     <button id="auth-login-btn" class="auth-choice-btn">Se connecter</button>
                     <button id="auth-signup-btn" class="auth-choice-btn">Créer un compte</button>
@@ -528,7 +504,7 @@
         if (!authPanel) return;
         authPanel.innerHTML = `
             <div class="auth-form simple-form">
-                <h3>Connexion ${role === 'client' ? 'Passagère' : 'conductrice'}</h3>
+                <h3>Connexion ${role === 'client' ? 'cliente' : 'conductrice'}</h3>
                 <input type="email" id="login-email" placeholder="Email">
                 <input type="password" id="login-password" placeholder="Mot de passe">
                 <button id="login-btn" class="confirm-btn">Se connecter</button>
@@ -586,7 +562,7 @@
         if (!authPanel) return;
         authPanel.innerHTML = `
             <div class="auth-form simple-form">
-                <h3>Inscription ${role === 'client' ? 'Passagère' : 'conductrice'}</h3>
+                <h3>Inscription ${role === 'client' ? 'cliente' : 'conductrice'}</h3>
                 <input type="text" id="auth-name" placeholder="Nom complet">
                 <input type="email" id="auth-email" placeholder="Email">
                 <input type="tel" id="auth-phone" placeholder="Téléphone">
@@ -710,19 +686,18 @@
         if (tabId === 'tracking' && trackingMap) setTimeout(() => trackingMap.invalidateSize(), 100);
     }
 
-function showDriverTab(tabId) {
-    console.log(`[DEBUG] showDriverTab appelé avec: ${tabId}`);
-    if (!driverTabs) return;
-    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.querySelector(`#driver-tabs .tab-btn[data-tab="${tabId}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
-    document.querySelectorAll('#driver-requests-tab, #driver-active-tab, #driver-history-tab, #driver-account-tab').forEach(pane => pane.classList.remove('active'));
-    if (tabId === 'driver-requests') driverRequestsTab.classList.add('active');
-    else if (tabId === 'driver-active') driverActiveTab.classList.add('active');
-    else if (tabId === 'driver-history') driverHistoryTab.classList.add('active');
-    else if (tabId === 'driver-account') driverAccountTab.classList.add('active');
-    if (tabId === 'driver-active' && driverTrackingMap) setTimeout(() => driverTrackingMap.invalidateSize(), 100);
-}
+    function showDriverTab(tabId) {
+        if (!driverTabs) return;
+        document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`#driver-tabs .tab-btn[data-tab="${tabId}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        document.querySelectorAll('#driver-requests-tab, #driver-active-tab, #driver-history-tab, #driver-account-tab').forEach(pane => pane.classList.remove('active'));
+        if (tabId === 'driver-requests') driverRequestsTab.classList.add('active');
+        else if (tabId === 'driver-active') driverActiveTab.classList.add('active');
+        else if (tabId === 'driver-history') driverHistoryTab.classList.add('active');
+        else if (tabId === 'driver-account') driverAccountTab.classList.add('active');
+        if (tabId === 'driver-active' && driverTrackingMap) setTimeout(() => driverTrackingMap.invalidateSize(), 100);
+    }
 
     // ==================== ÉCRAN D'ATTENTE ====================
     function showWaitingView(rideId) {
@@ -851,47 +826,47 @@ function showDriverTab(tabId) {
         loadMessages(rideId, 'client');
     }
 
-async function loadMessages(rideId, role) {
-    console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
-    
-    // Nettoyer l'écouteur précédent pour le rôle driver
-    if (role === 'driver' && driverMessagesUnsubscribe) {
-        driverMessagesUnsubscribe();
-        driverMessagesUnsubscribe = null;
-        console.log('[DEBUG] Ancien écouteur de messages nettoyé');
-    }
-
-    const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
-    const unsubscribe = q.onSnapshot((snapshot) => {
-        const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
-        if (!container) {
-            console.warn(`[DEBUG] Conteneur non trouvé pour role: ${role}`);
-            return;
+    async function loadMessages(rideId, role) {
+        console.log(`[DEBUG] loadMessages appelé pour rideId: ${rideId}, role: ${role}`);
+        
+        // Nettoyer l'écouteur précédent pour le rôle driver
+        if (role === 'driver' && driverMessagesUnsubscribe) {
+            driverMessagesUnsubscribe();
+            driverMessagesUnsubscribe = null;
+            console.log('[DEBUG] Ancien écouteur de messages nettoyé');
         }
-        
-        const previousCount = container.children.length;
-        console.log(`[DEBUG] ${snapshot.size} messages reçus pour ${role}`);
-        
-        container.innerHTML = '';
-        snapshot.forEach(docSnap => {
-            const msg = docSnap.data();
-            addMessageToChat(msg.text, msg.sender === role ? 'sent' : 'received', new Date(msg.timestamp).toLocaleTimeString(), container);
+
+        const q = db.collection('rides').doc(rideId).collection('messages').orderBy('timestamp');
+        const unsubscribe = q.onSnapshot((snapshot) => {
+            const container = role === 'client' ? chatMessagesDiv : driverChatMessagesDiv;
+            if (!container) {
+                console.warn(`[DEBUG] Conteneur non trouvé pour role: ${role}`);
+                return;
+            }
+            
+            const previousCount = container.children.length;
+            console.log(`[DEBUG] ${snapshot.size} messages reçus pour ${role}`);
+            
+            container.innerHTML = '';
+            snapshot.forEach(docSnap => {
+                const msg = docSnap.data();
+                addMessageToChat(msg.text, msg.sender === role ? 'sent' : 'received', new Date(msg.timestamp).toLocaleTimeString(), container);
+            });
+            
+            // Jouer un son pour les nouveaux messages reçus
+            if (snapshot.size > previousCount) {
+                const lastMessage = snapshot.docs[snapshot.size - 1].data();
+                if (lastMessage.sender !== role) {
+                    playMessageSound();
+                }
+            }
         });
         
-        // Jouer un son pour les nouveaux messages reçus
-        if (snapshot.size > previousCount) {
-            const lastMessage = snapshot.docs[snapshot.size - 1].data();
-            if (lastMessage.sender !== role) {
-                playMessageSound();
-            }
+        if (role === 'driver') {
+            driverMessagesUnsubscribe = unsubscribe;
+            console.log('[DEBUG] Nouvel écouteur de messages enregistré');
         }
-    });
-    
-    if (role === 'driver') {
-        driverMessagesUnsubscribe = unsubscribe;
-        console.log('[DEBUG] Nouvel écouteur de messages enregistré');
     }
-}
 
     async function sendMessage(rideId, text, senderRole) {
         if (!text.trim()) return;
@@ -1080,17 +1055,6 @@ async function loadMessages(rideId, role) {
                 driverName: currentUser.displayName || currentUser.email,
                 vehicle: 'Renault Zoé'
             });
-            
-            // Envoyer la mise à jour à Google Sheets
-            const rideDoc = await db.collection('rides').doc(rideId).get();
-            const ride = rideDoc.data();
-            sendToGoogleSheets({
-                id: rideId,
-                driverName: currentUser.displayName || currentUser.email,
-                status: 'accepted',
-                updatedAt: new Date().toISOString()
-            });
-            
             showToast('Course acceptée ! Vous pouvez suivre le trajet.');
         } catch (error) {
             showToast('Erreur lors de l’acceptation : ' + error.message);
@@ -1119,32 +1083,32 @@ async function loadMessages(rideId, role) {
         });
     }
 
-function displayDriverActiveRide(ride, rideId) {
-    driverClientNameSpan.innerText = ride.clientName;
-    driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
-    driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la cliente' : 'Course en cours';
+    function displayDriverActiveRide(ride, rideId) {
+        driverClientNameSpan.innerText = ride.clientName;
+        driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
+        driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la cliente' : 'Course en cours';
 
-    if (driverTrackingMap) driverTrackingMap.remove();
-    const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
-    driverTrackingMap = L.map('driver-tracking-map').setView(center, 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(driverTrackingMap);
-    L.marker([ride.pickupCoords.lat, ride.pickupCoords.lng], { icon: orangeIcon }).addTo(driverTrackingMap).bindPopup('Prise en charge');
-    L.marker([ride.dropoffCoords.lat, ride.dropoffCoords.lng], { icon: blueIcon }).addTo(driverTrackingMap).bindPopup('Destination');
-    L.polyline([[ride.pickupCoords.lat, ride.pickupCoords.lng], [ride.dropoffCoords.lat, ride.dropoffCoords.lng]], { color: '#b5838a', weight: 3 }).addTo(driverTrackingMap);
-    if (driverPosition) {
-        const driverMarker = L.marker([driverPosition.lat, driverPosition.lng], { icon: L.divIcon({ html: '🚗', className: 'driver-marker', iconSize: [30, 30] }) }).addTo(driverTrackingMap);
-        driverTrackingMap.driverMarker = driverMarker;
-    } else {
-        driverTrackingMap.driverMarker = null;
+        if (driverTrackingMap) driverTrackingMap.remove();
+        const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
+        driverTrackingMap = L.map('driver-tracking-map').setView(center, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(driverTrackingMap);
+        L.marker([ride.pickupCoords.lat, ride.pickupCoords.lng], { icon: orangeIcon }).addTo(driverTrackingMap).bindPopup('Prise en charge');
+        L.marker([ride.dropoffCoords.lat, ride.dropoffCoords.lng], { icon: blueIcon }).addTo(driverTrackingMap).bindPopup('Destination');
+        L.polyline([[ride.pickupCoords.lat, ride.pickupCoords.lng], [ride.dropoffCoords.lat, ride.dropoffCoords.lng]], { color: '#b5838a', weight: 3 }).addTo(driverTrackingMap);
+        if (driverPosition) {
+            const driverMarker = L.marker([driverPosition.lat, driverPosition.lng], { icon: L.divIcon({ html: '🚗', className: 'driver-marker', iconSize: [30, 30] }) }).addTo(driverTrackingMap);
+            driverTrackingMap.driverMarker = driverMarker;
+        } else {
+            driverTrackingMap.driverMarker = null;
+        }
+
+        // Forcer le chargement des messages avec un délai suffisant
+        setTimeout(() => {
+            loadMessages(rideId, 'driver');
+        }, 500);
     }
-
-    // Forcer le chargement des messages avec un délai suffisant
-    setTimeout(() => {
-        loadMessages(rideId, 'driver');
-    }, 500);
-}
 
     async function loadDriverHistory() {
         if (!currentUser) return;
@@ -1168,12 +1132,12 @@ function displayDriverActiveRide(ride, rideId) {
                 html += `
                     <div class="history-item">
                         <div class="history-details">
-                            <p><strong>Passagère :</strong> ${ride.clientName}</p>
+                            <p><strong>Cliente :</strong> ${ride.clientName}</p>
                             <p>${ride.pickup} → ${ride.dropoff}</p>
                             <p><strong>Prix :</strong> ${ride.price} €</p>
                             <small>${new Date(ride.createdAt).toLocaleString()}</small>
                             <p>Statut : ${ride.status}</p>
-                            ${ride.clientRating ? `<p>Note de la Passagère : ${ride.clientRating} ★</p>` : ''}
+                            ${ride.clientRating ? `<p>Note de la cliente : ${ride.clientRating} ★</p>` : ''}
                         </div>
                     </div>
                 `;
@@ -1431,19 +1395,6 @@ function displayDriverActiveRide(ride, rideId) {
                 showLoading();
                 try {
                     const docRef = await db.collection('rides').add(rideData);
-                    
-                    // Envoyer à Google Sheets
-                    sendToGoogleSheets({
-                        id: docRef.id,
-                        clientName: currentUser.displayName || currentUser.email,
-                        pickup: pickupInput.value,
-                        dropoff: dropoffInput.value,
-                        price: parseFloat(price),
-                        status: 'pending',
-                        createdAt: new Date().toISOString(),
-                        paymentMethod: null
-                    });
-                    
                     showPaymentModal(docRef.id, parseFloat(price));
                 } catch (error) {
                     showToast('Erreur lors de la création de la course : ' + error.message);
@@ -1477,7 +1428,7 @@ function displayDriverActiveRide(ride, rideId) {
                 const { lat, lng } = currentDriverRide.pickupCoords;
                 const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
                 window.open(wazeUrl, '_blank');
-                showToast('Ouverture de Waze vers la Passagère.');
+                showToast('Ouverture de Waze vers la cliente.');
             });
         }
 
@@ -1512,14 +1463,6 @@ function displayDriverActiveRide(ride, rideId) {
                     showLoading();
                     try {
                         await db.collection('rides').doc(activeRideId).update({ status: 'completed' });
-                        
-                        // Envoyer la mise à jour à Google Sheets
-                        sendToGoogleSheets({
-                            id: activeRideId,
-                            status: 'completed',
-                            updatedAt: new Date().toISOString()
-                        });
-                        
                         activeRideId = null;
                         currentDriverRide = null;
                         showDriverTab('driver-requests');
@@ -1547,14 +1490,6 @@ function displayDriverActiveRide(ride, rideId) {
                         showLoading();
                         try {
                             await db.collection('rides').doc(activeRideId).update({ status: 'cancelled' });
-                            
-                            // Envoyer la mise à jour à Google Sheets
-                            sendToGoogleSheets({
-                                id: activeRideId,
-                                status: 'cancelled',
-                                updatedAt: new Date().toISOString()
-                            });
-                            
                             activeRideId = null;
                             currentDriverRide = null;
                             showDriverTab('driver-requests');
@@ -1592,14 +1527,6 @@ function displayDriverActiveRide(ride, rideId) {
                     showLoading();
                     try {
                         await db.collection('rides').doc(activeRideId).update({ status: 'completed' });
-                        
-                        // Envoyer la mise à jour à Google Sheets
-                        sendToGoogleSheets({
-                            id: activeRideId,
-                            status: 'completed',
-                            updatedAt: new Date().toISOString()
-                        });
-                        
                         activeRideId = null;
                         resetClientBooking();
                         if (bookingDiv) bookingDiv.style.display = 'block';
@@ -1623,14 +1550,6 @@ function displayDriverActiveRide(ride, rideId) {
                         showLoading();
                         try {
                             await db.collection('rides').doc(activeRideId).update({ status: 'cancelled' });
-                            
-                            // Envoyer la mise à jour à Google Sheets
-                            sendToGoogleSheets({
-                                id: activeRideId,
-                                status: 'cancelled',
-                                updatedAt: new Date().toISOString()
-                            });
-                            
                             activeRideId = null;
                             resetClientBooking();
                             if (bookingDiv) bookingDiv.style.display = 'block';
@@ -1692,38 +1611,46 @@ function displayDriverActiveRide(ride, rideId) {
         }
 
         // Onglets conductrice
-if (driverTabs) {
-    document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (currentRole !== 'driver') return;
-            const tabId = btn.dataset.tab;
-            console.log(`[DEBUG] Clic sur onglet conductrice: ${tabId}`);
-            showDriverTab(tabId);
-            
-            if (tabId === 'driver-history') {
-                if (currentUser) loadDriverHistory();
-                else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
-            }
-            if (tabId === 'driver-account') {
-                if (currentUser) showDriverProfile();
-            }
-            if (tabId === 'driver-active') {
-                if (activeRideId && currentUser) {
-                    // Forcer le rechargement des messages
-                    if (currentDriverRide) {
-                        loadMessages(activeRideId, 'driver');
-                    } else {
-                        db.collection('rides').doc(activeRideId).get().then(doc => {
-                            if (doc.exists) {
-                                currentDriverRide = doc.data();
-                                loadMessages(activeRideId, 'driver');
-                            }
-                        });
+        if (driverTabs) {
+            document.querySelectorAll('#driver-tabs .tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentRole !== 'driver') return;
+                    const tabId = btn.dataset.tab;
+                    console.log(`[DEBUG] Clic sur onglet conductrice: ${tabId}`);
+                    showDriverTab(tabId);
+                    
+                    if (tabId === 'driver-history') {
+                        if (currentUser) loadDriverHistory();
+                        else document.getElementById('driver-history-list').innerHTML = '<p>Veuillez vous connecter pour voir votre historique.</p>';
                     }
-                } else {
-                    console.log('[DEBUG] Aucune course active pour charger les messages');
-                }
+                    if (tabId === 'driver-account') {
+                        if (currentUser) showDriverProfile();
+                    }
+                    if (tabId === 'driver-active') {
+                        if (activeRideId && currentUser) {
+                            if (currentDriverRide) {
+                                loadMessages(activeRideId, 'driver');
+                            } else {
+                                db.collection('rides').doc(activeRideId).get().then(doc => {
+                                    if (doc.exists) {
+                                        currentDriverRide = doc.data();
+                                        loadMessages(activeRideId, 'driver');
+                                    }
+                                });
+                            }
+                        } else {
+                            console.log('[DEBUG] Aucune course active pour charger les messages');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Carte client
+        setTimeout(() => {
+            if (!map && document.getElementById('map')) {
+                initMap();
             }
-        });
+        }, 500);
     });
-}
+})();
