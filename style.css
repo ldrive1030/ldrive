@@ -803,3 +803,64 @@ body {
         font-size: 18px;
     }
 }
+
+
+/* Optimisation mobile - Bloc de course visible sans scroll */
+@media (max-width: 550px) {
+    .ride-options {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 12px 0 20px;
+        border-top: 1px solid #f0e2e6;
+        margin-top: 16px;
+        z-index: 5;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .ride-options h3 {
+        font-size: 14px;
+        margin: 0 0 8px 0;
+    }
+    
+    .ride-card {
+        padding: 8px 12px;
+    }
+    
+    .ride-info h4 {
+        font-size: 14px;
+    }
+    
+    .ride-info p {
+        font-size: 11px;
+    }
+    
+    .ride-price {
+        font-size: 16px;
+    }
+    
+    .confirm-btn {
+        padding: 12px;
+        font-size: 14px;
+        margin-top: 12px;
+    }
+    
+    /* Réduire la hauteur de la carte */
+    #map {
+        height: 220px;
+    }
+    
+    /* Réduire les paddings généraux */
+    .tab-pane {
+        padding: 12px;
+    }
+    
+    .location-inputs {
+        margin-bottom: 12px;
+    }
+    
+    .input-group {
+        padding: 8px 12px;
+        margin-bottom: 8px;
+    }
+}
