@@ -110,7 +110,7 @@
     // ==================== NOTIFICATION SONORE ====================
     function playNotificationSound() {
         try {
-            const audio = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3');
+            const audio = new Audio(('sounds/ma-notification.mp3');
             audio.volume = 0.5;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
@@ -120,8 +120,8 @@
 
     function playMessageSound() {
         try {
-            const audio = new Audio('https://www.soundjay.com/misc/sounds/notification-01.mp3');
-            audio.volume = 0.4;
+            const audio = new Audio('sounds/notification.mp3');
+            audio.volume = 0.8;
             audio.play().catch(e => console.log('Audio playback failed:', e));
         } catch (e) {
             console.log('Audio not supported');
@@ -390,7 +390,7 @@
                 const role = userDoc.data().role;
                 if (role === 'client' || role === 'driver') {
                     currentRole = role;
-                    if (roleDisplayDiv) roleDisplayDiv.innerHTML = `<span class="role-badge">${role === 'client' ? '👩 Cliente' : '👩‍✈️ Conductrice'}</span>`;
+                    if (roleDisplayDiv) roleDisplayDiv.innerHTML = `<span class="role-badge">${role === 'client' ? '👩 Passagère' : '👩‍✈️ Conductrice'}</span>`;
                     if (authPanel) authPanel.style.display = 'none';
                     setRole(role);
                     return;
@@ -420,7 +420,7 @@
                 <h2>Bienvenue ${user.displayName || user.email}</h2>
                 <p>Choisissez votre profil :</p>
                 <div class="role-choice-buttons">
-                    <button id="choose-client-existing" class="role-choice-btn">👩 Je suis une cliente</button>
+                    <button id="choose-client-existing" class="role-choice-btn">👩 Je suis une Passagère</button>
                     <button id="choose-driver-existing" class="role-choice-btn">👩‍✈️ Je suis une conductrice</button>
                 </div>
             </div>
@@ -462,7 +462,7 @@
                 <h2>Bienvenue sur Ldrive</h2>
                 <p>Choisissez votre profil :</p>
                 <div class="role-choice-buttons">
-                    <button id="choose-client" class="role-choice-btn">👩 Je suis une cliente</button>
+                    <button id="choose-client" class="role-choice-btn">👩 Je suis une Passagère</button>
                     <button id="choose-driver" class="role-choice-btn">👩‍✈️ Je suis une conductrice</button>
                 </div>
             </div>
@@ -482,7 +482,7 @@
         if (!authPanel) return;
         authPanel.innerHTML = `
             <div class="role-choice-container">
-                <h2>${role === 'client' ? 'Cliente' : 'Conductrice'}</h2>
+                <h2>${role === 'client' ? 'Passagère' : 'Conductrice'}</h2>
                 <div class="auth-choice-buttons">
                     <button id="auth-login-btn" class="auth-choice-btn">Se connecter</button>
                     <button id="auth-signup-btn" class="auth-choice-btn">Créer un compte</button>
@@ -504,7 +504,7 @@
         if (!authPanel) return;
         authPanel.innerHTML = `
             <div class="auth-form simple-form">
-                <h3>Connexion ${role === 'client' ? 'cliente' : 'conductrice'}</h3>
+                <h3>Connexion ${role === 'client' ? 'Passagère' : 'conductrice'}</h3>
                 <input type="email" id="login-email" placeholder="Email">
                 <input type="password" id="login-password" placeholder="Mot de passe">
                 <button id="login-btn" class="confirm-btn">Se connecter</button>
@@ -562,7 +562,7 @@
         if (!authPanel) return;
         authPanel.innerHTML = `
             <div class="auth-form simple-form">
-                <h3>Inscription ${role === 'client' ? 'cliente' : 'conductrice'}</h3>
+                <h3>Inscription ${role === 'client' ? 'Passagère' : 'conductrice'}</h3>
                 <input type="text" id="auth-name" placeholder="Nom complet">
                 <input type="email" id="auth-email" placeholder="Email">
                 <input type="tel" id="auth-phone" placeholder="Téléphone">
@@ -1086,7 +1086,7 @@
     function displayDriverActiveRide(ride, rideId) {
         driverClientNameSpan.innerText = ride.clientName;
         driverRouteSpan.innerText = `${ride.pickup} → ${ride.dropoff}`;
-        driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la cliente' : 'Course en cours';
+        driverStatusText.innerText = ride.status === 'accepted' ? 'En route vers la Passagère' : 'Course en cours';
 
         if (driverTrackingMap) driverTrackingMap.remove();
         const center = driverPosition ? [driverPosition.lat, driverPosition.lng] : [ride.pickupCoords.lat, ride.pickupCoords.lng];
@@ -1132,12 +1132,12 @@
                 html += `
                     <div class="history-item">
                         <div class="history-details">
-                            <p><strong>Cliente :</strong> ${ride.clientName}</p>
+                            <p><strong>Passagère :</strong> ${ride.clientName}</p>
                             <p>${ride.pickup} → ${ride.dropoff}</p>
                             <p><strong>Prix :</strong> ${ride.price} €</p>
                             <small>${new Date(ride.createdAt).toLocaleString()}</small>
                             <p>Statut : ${ride.status}</p>
-                            ${ride.clientRating ? `<p>Note de la cliente : ${ride.clientRating} ★</p>` : ''}
+                            ${ride.clientRating ? `<p>Note de la Passagère : ${ride.clientRating} ★</p>` : ''}
                         </div>
                     </div>
                 `;
@@ -1428,7 +1428,7 @@
                 const { lat, lng } = currentDriverRide.pickupCoords;
                 const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
                 window.open(wazeUrl, '_blank');
-                showToast('Ouverture de Waze vers la cliente.');
+                showToast('Ouverture de Waze vers la Passagère.');
             });
         }
 
